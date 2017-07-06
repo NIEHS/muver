@@ -39,13 +39,13 @@ def get_repeat_adjustment_value(unit_length, repeat_sequence_length,
 
     fit = fits[event_type][unit_length]
 
-    return 10 ** logistic(
+    return 10 ** min(0, logistic(
         repeat_sequence_length,
         fit['x0'],
         fit['L'],
         fit['M'],
         fit['k'],
-    )
+    ))
 
 
 def genotype_to_allele_counts(genotype, alleles):
