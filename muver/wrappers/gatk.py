@@ -1,13 +1,13 @@
 import sys
 from subprocess import call
 
-from __init__ import PATHS
+from __init__ import PATHS, quiet_call
 
 
 #  Run GATK BaseRecalibrator
 def run_base_recalibrator(bam, known_sites, ref_fn, recal_table, log_file,):
 
-    call([
+    quiet_call([
         'java', '-Xmx8g', '-jar',
         PATHS['gatk'],
         '-T', 'BaseRecalibrator',
@@ -25,7 +25,7 @@ def run_base_recalibrator(bam, known_sites, ref_fn, recal_table, log_file,):
 def run_print_reads_bqsr(input_bam, ref_fn, recal_table, output_bam, log_file):
 
     sys.stdout.write('Running GATK PrintReads.\n')
-    call([
+    quiet_call([
         'java', '-Xmx8g', '-jar',
         PATHS['gatk'],
         '-T', 'PrintReads',
@@ -45,7 +45,7 @@ def run_haplotype_caller(bams, ref_fn, output_vcf, log_file, nct=1):
         input_list.extend(('-I', bam))
 
     sys.stdout.write('Running GATK HaplotypeCaller.\n')
-    call([
+    quiet_call([
         'java', '-Xmx8g', '-jar',
         PATHS['gatk'],
         '-T', 'HaplotypeCaller',
@@ -61,7 +61,7 @@ def run_haplotype_caller(bams, ref_fn, output_vcf, log_file, nct=1):
 
 def realigner_target_creator(ref_fn, in_bam, intervals):
 
-    call([
+    quiet_call([
         'java', '-Xmx4g', '-jar',
         PATHS['gatk'],
         '-R', ref_fn,
@@ -73,7 +73,7 @@ def realigner_target_creator(ref_fn, in_bam, intervals):
 
 def indel_realigner(ref_fn, log, in_bam, intervals, realigned_bam):
 
-    call([
+    quiet_call([
         'java', '-Xmx4g', '-jar',
         PATHS['gatk'],
         '-R', ref_fn,

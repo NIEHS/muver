@@ -4,23 +4,22 @@ import subprocess
 
 from subprocess import call
 
-from __init__ import PATHS
+from __init__ import PATHS, quiet_call
 
 
 def mapq_filter(in_sam, out_sam, q=20):
 
-    with open(out_sam, 'w') as OUT:
-        call([
-            PATHS['samtools'], 'view',
-            '-Sh',
-            '-q', str(q),
-            in_sam,
-        ], stdout=OUT)
+    quiet_call([
+        PATHS['samtools'], 'view',
+        '-Sh',
+        '-q', str(q),
+        in_sam,
+    ], stdout=out_sam)
 
 
 def index_bam(bam_fn):
 
-    call([
+    quiet_call([
         PATHS['samtools'], 'index',
         bam_fn,
     ])
@@ -28,7 +27,7 @@ def index_bam(bam_fn):
 
 def merge_bams(bam_list, out_bam):
 
-    call([
+    quiet_call([
         PATHS['samtools'], 'merge', '-f',
         out_bam,
     ] + bam_list)
@@ -38,16 +37,15 @@ def merge_bams(bam_list, out_bam):
 
 def run_mpileup(bam_file, ref_fn, output_file):
     sys.stdout.write('Running samtools mpileup.\n')
-    with open(output_file, 'w') as OUT:
-        call([
-            PATHS['samtools'], 'mpileup',
-            '-q', '5',
-            '-Q', '10',
-            '-B',
-            '-d', '100000',
-            '-f', ref_fn,
-            bam_file,
-        ], stdout=OUT)
+    quiet_call([
+        PATHS['samtools'], 'mpileup',
+        '-q', '5',
+        '-Q', '10',
+        '-B',
+        '-d', '100000',
+        '-f', ref_fn,
+        bam_file,
+    ], stdout=output_file)
 
 
 def mpileup_iter(bam_file, ref_fn):
@@ -60,7 +58,7 @@ def mpileup_iter(bam_file, ref_fn):
         '-d', '100000',
         '-f', ref_fn,
         bam_file,
-    ], stdout = subprocess.PIPE)
+    ], stdout=subprocess.PIPE, stderr=open(os.devnull, 'w'))
 
     return iter(proc.stdout.readline, '')
 
@@ -68,7 +66,7 @@ def mpileup_iter(bam_file, ref_fn):
 def faidx_index(ref_fn):
 
     if not os.path.exists(ref_fn + '.fai'):
-        call([
+        quiet_call([
             PATHS['samtools'], 'faidx',
             ref_fn,
         ])
@@ -79,7 +77,7 @@ def view_bam(input_bam):
     proc = subprocess.Popen([
         PATHS['samtools'], 'view',
         input_bam,
-    ], stdout = subprocess.PIPE)
+    ], stdout=subprocess.PIPE, stderr=open(os.devnull, 'w'))
 
     return iter(proc.stdout.readline, '')
 
@@ -106,7 +104,7 @@ def get_mpileup_depths(input_bam, ref_fn, output_bedgraph):
         '-d', '100000',
         '-f', ref_fn,
         input_bam,
-    ], stdout = subprocess.PIPE)
+    ], stdout=subprocess.PIPE, stderr=open(os.devnull, 'w'))
 
     last_pos = None
     last_val = None

@@ -1,8 +1,7 @@
 import os
 import sys
-from subprocess import call
 
-from __init__ import PATHS
+from __init__ import PATHS, quiet_call
 
 
 #  Align sequences from FASTQ files using Bowtie2
@@ -13,7 +12,7 @@ def align(fastq_1, ref_fn, output_fn, fastq_2=None, p=1):
         assert os.path.exists(fastq_2)
 
     if fastq_2:
-        call([
+        quiet_call([
             PATHS['bowtie2'],
             '-q',
             '--phred33',
@@ -30,7 +29,7 @@ def align(fastq_1, ref_fn, output_fn, fastq_2=None, p=1):
         ])
 
     else:
-        call([
+        quiet_call([
             PATHS['bowtie2'],
             '-q',
             '--phred33',
@@ -56,7 +55,7 @@ def build(ref_fn):
         os.path.isfile(ref_fn + '.rev.2.bt2')
     ):
         sys.stdout.write('Bowtie2 index not found: Building.\n')
-        call([
+        quiet_call([
             PATHS['bowtie2_build'],
             ref_fn,
             ref_fn,

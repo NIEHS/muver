@@ -1,14 +1,14 @@
 import os
 from subprocess import call
 
-from __init__ import PATHS
+from __init__ import PATHS, quiet_call
 
 from samtools import index_bam
 
 
 def add_read_groups(in_sam, out_bam, sample_header):
 
-    call([
+    quiet_call([
         'java', '-Xmx2g', '-jar',
         PATHS['picard'],
         'AddOrReplaceReadGroups',
@@ -26,7 +26,7 @@ def add_read_groups(in_sam, out_bam, sample_header):
 
 def deduplicate(in_bam, out_bam, metrics_file):
 
-    call([
+    quiet_call([
         'java', '-Xmx2g', '-jar',
         PATHS['picard'],
         'MarkDuplicates',
@@ -44,7 +44,7 @@ def create_sequence_dictionary(ref_fn):
 
     if not os.path.exists(ref_fn.split('.fa')[0] + '.dict'):
 
-        call([
+        quiet_call([
             'java', '-Xmx2g', '-jar',
             PATHS['picard'],
             'CreateSequenceDictionary',
@@ -55,7 +55,7 @@ def create_sequence_dictionary(ref_fn):
 
 def fix_mate_information(in_bam, out_bam):
 
-    call([
+    quiet_call([
         'java', '-Xmx2g', '-jar',
         '/ddn/gs1/home/lavenderca/TOOLS/picard-tools-1.118/FixMateInformation.jar',  # noqa
         'VALIDATION_STRINGENCY=SILENT',
