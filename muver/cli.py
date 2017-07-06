@@ -132,7 +132,7 @@ def create_repeat_file(fasta_file, output_repeat_file):
 @click.argument('chrom_sizes_file', type=click.Path(exists=True))
 @click.argument('input_bedgraph', type=click.Path(exists=True))
 @click.argument('output_bedgraph', type=str)
-def depth_correction(y_int, scalar, mean_log, sd_log, slope, chrom_sizes_file,
+def correct_depths(y_int, scalar, mean_log, sd_log, slope, chrom_sizes_file,
                      input_bedgraph, output_bedgraph):
     '''
     Correct values in a depth bedGraph file.
