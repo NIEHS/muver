@@ -4,9 +4,10 @@ import sys
 from __init__ import PATHS, quiet_call
 
 
-#  Align sequences from FASTQ files using Bowtie2
 def align(fastq_1, ref_fn, output_fn, fastq_2=None, p=1):
-
+    '''
+    Align reads using Bowtie2.
+    '''
     assert os.path.exists(fastq_1)
     if fastq_2:
         assert os.path.exists(fastq_2)
@@ -45,7 +46,9 @@ def align(fastq_1, ref_fn, output_fn, fastq_2=None, p=1):
 
 
 def build(ref_fn):
-
+    '''
+    Build Bowtie2 index for reference if none found.
+    '''
     if not (
         os.path.isfile(ref_fn + '.1.bt2') and
         os.path.isfile(ref_fn + '.2.bt2') and
