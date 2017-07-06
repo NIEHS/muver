@@ -13,6 +13,10 @@ with open('HISTORY.rst') as history_file:
 
 requirements = [
     'Click>=6.0',
+    'numpy>=1.12.0',
+    'scipy>=0.18.1',
+    'matplotlib>=2.0.0',
+    'regex>=2017.6.23',
     # TODO: put package requirements here
 ]
 
