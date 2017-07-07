@@ -108,16 +108,6 @@ def get_mpileup_depths(input_bam, ref_fn, output_bedgraph):
                 )
             )
 
-    proc = subprocess.Popen([
-        PATHS['samtools'], 'mpileup',
-        '-q', '5',
-        '-Q', '10',
-        '-B',
-        '-d', '100000',
-        '-f', ref_fn,
-        input_bam,
-    ], stdout=subprocess.PIPE, stderr=open(os.devnull, 'w'))
-
     last_pos = None
     last_val = None
     last_chr = None
@@ -125,7 +115,7 @@ def get_mpileup_depths(input_bam, ref_fn, output_bedgraph):
     end = None
 
     with open(output_bedgraph, 'w') as OUT:
-        for line in iter(proc.stdout.readline, ''):
+        for line in mpileup_iter(input_bam, ref_fn):
             line_split = line.strip().split()
 
             chromosome, position, reference_base, coverage = line_split[:4]
