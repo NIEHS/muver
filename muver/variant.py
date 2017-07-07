@@ -530,12 +530,13 @@ class Variant(object):
                 for counts in allele_counts.values():
                     sample_sum += sum(counts.values())
 
-                allele_frequency = float(f + r) / sample_sum
+                genotype_allele_frequency = \
+                    float(genotype.count(subclonal_allele)) / len(genotype)
 
                 binomial_p_value = binom.cdf(
                     sample_sum - f - r,
                     sample_sum,
-                    1.0 - allele_frequency,
+                    1.0 - genotype_allele_frequency,
                 )
 
             else:
