@@ -1,5 +1,3 @@
-import sys
-
 from __init__ import PATHS, quiet_call
 
 
