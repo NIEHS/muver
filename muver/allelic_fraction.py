@@ -1,31 +1,10 @@
-#!/usr/bin/env python
-
-import re
-import math
-import argparse
-import subprocess
-
 from collections import defaultdict
+import re
 
 from wrappers.samtools import mpileup_iter
 
 
 def get_allelic_fractions(bam_file, ref_fn, output_file):
-
-    # #  Run samtools mpileup
-    # proc = subprocess.Popen([
-    #     samtools_path, 'mpileup',
-    #     '-q', '5',
-    #     '-Q', '10',
-    #     '-B',
-    #     '-d', '100000',
-    #     '-f', ref_fn,
-    #     bam_file,
-    # ], stdout = subprocess.PIPE)
-    #
-    # fraction_histogram = defaultdict(int)
-    #
-    # for line in iter(proc.stdout.readline, ''):
 
     fraction_histogram = defaultdict(int)
 
@@ -97,7 +76,8 @@ def get_allelic_fractions(bam_file, ref_fn, output_file):
 
         if total > 20:
             for allele in present_alleles:
-                fraction = float(plus_tally[allele] + minus_tally[allele]) / total
+                fraction = float(plus_tally[allele] + minus_tally[allele]) \
+                    / total
                 fraction_histogram[str(round(fraction, 2))] += 1
             if deletion_count > 0:
                 fraction = float(deletion_count) / total
