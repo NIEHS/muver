@@ -56,6 +56,9 @@ def run_haplotype_caller(bams, ref_fn, output_vcf, log_file, nct=1):
         '-nct', str(nct),
         '-mmq', '5',
         '-log', log_file,
+        '--minPruning', '0',
+        '--minDanglingBranchLength', '0',
+        '--pcr_indel_model', 'NONE',
     ] + input_list)
 
 
