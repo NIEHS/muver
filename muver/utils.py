@@ -1,29 +1,29 @@
 import subprocess
 
 
-def read_cnv_files(file_list):
-
-    cnv_regions = dict()
-
-    with open(file_list) as _list:
-        for entry in _list:
-
-            sample, fn = entry.strip().split()
-            ploidy_locus_table[sample] = dict()
-
-            with open(fn) as f:
-                for line in f:
-                    chromosome, start, end, ploidy = line.strip().split()
-
-                    start = int(start) + 1
-                    end = int(end)
-
-                    for i in range(start, end + 1):
-                        ploidy_locus_table[sample][(chromosome, str(i))] = \
-                            ploidy
-
-    return ploidy_locus_table
-
+# def read_cnv_files(file_list):
+#
+#     cnv_regions = dict()
+#
+#     with open(file_list) as _list:
+#         for entry in _list:
+#
+#             sample, fn = entry.strip().split()
+#             ploidy_locus_table[sample] = dict()
+#
+#             with open(fn) as f:
+#                 for line in f:
+#                     chromosome, start, end, ploidy = line.strip().split()
+#
+#                     start = int(start) + 1
+#                     end = int(end)
+#
+#                     for i in range(start, end + 1):
+#                         ploidy_locus_table[sample][(chromosome, str(i))] = \
+#                             ploidy
+#
+#     return ploidy_locus_table
+#
 
 def read_excluded_regions(excluded_regions_fn):
     excluded_regions = set()
