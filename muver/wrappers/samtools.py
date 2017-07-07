@@ -1,5 +1,4 @@
 import os
-import sys
 import subprocess
 
 from __init__ import PATHS, quiet_call
@@ -116,11 +115,12 @@ def get_mpileup_depths(input_bam, ref_fn, output_bedgraph):
 
     with open(output_bedgraph, 'w') as OUT:
         for line in mpileup_iter(input_bam, ref_fn):
-            line_split = line.strip().split()
 
+            line_split = line.strip().split()
             chromosome, position, reference_base, coverage = line_split[:4]
             position = int(position)
             coverage = int(coverage)
+
             if int(coverage) > 0:
                 bases = line_split[4]
             else:
