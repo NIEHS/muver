@@ -5,7 +5,9 @@ from wrappers.samtools import mpileup_iter
 
 
 def get_allelic_fractions(bam_file, ref_fn, output_file):
-
+    '''
+    Read over a BAM file, output an allele fraction histogram.
+    '''
     fraction_histogram = defaultdict(int)
 
     for line in mpileup_iter(bam_file, ref_fn):

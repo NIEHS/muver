@@ -2,6 +2,9 @@ import subprocess
 
 
 def read_excluded_regions(excluded_regions_fn):
+    '''
+    Read excluded regions from an input file. Return as a dict.
+    '''
     excluded_regions = set()
 
     with open(excluded_regions_fn) as f:
@@ -19,7 +22,10 @@ def read_excluded_regions(excluded_regions_fn):
 
 
 def read_chrom_sizes(reference_assembly_fn):
-
+    '''
+    Iterate through a reference assembly to find length of associated
+    sequences.
+    '''
     chrom_sizes = dict()
     last_chromosome = None
 
@@ -40,7 +46,9 @@ def read_chrom_sizes(reference_assembly_fn):
 
 
 def read_repeats(repeats_fn):
-
+    '''
+    Read repeats from an input file and return in a dict.
+    '''
     repeats = dict()
 
     with open(repeats_fn) as f:
@@ -71,7 +79,9 @@ def read_repeats(repeats_fn):
 
 
 def get_mpileup_output(in_bam, ref_fn, out_txt):
-
+    '''
+    Pipe the output of samtools mpileup to a TXT file.
+    '''
     samtools_path = 'samtools'
 
     with open(out_txt, 'w') as OUT:
@@ -89,7 +99,11 @@ def get_mpileup_output(in_bam, ref_fn, out_txt):
 
 
 def read_filtered_sites(samples):
-
+    '''
+    Considering a list of sample objects, open the associated filtered sites
+    files and add those sites to sample-specific sets. Return the sets in a
+    dict.
+    '''
     filtered_sites = dict()
 
     for sample in samples:

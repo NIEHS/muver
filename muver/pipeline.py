@@ -16,7 +16,17 @@ from wrappers import bowtie2, gatk, picard, samtools
 
 
 def process_sams(args):
+    '''
+    Process SAM files for a given sample.  Perform the following:
 
+    - Remove read pairs on different chromosomes.
+    - Filter by MAPQ value.
+    - Add read groups based on sample name.
+    - Deduplicate.
+    - Realign indels.
+    - Fix mate information.
+    - Merge processed BAMS for a given sample.
+    '''
     sample_name, intermediate_files, reference_assembly = args
 
     for i in range(len(intermediate_files['_sams'])):
@@ -63,7 +73,9 @@ def process_sams(args):
 
 
 def characterize_repeat_indel_rates(args):
-
+    '''
+    For a given sample, fit repeat indel rates.
+    '''
     intermediate_files, repeats, repeat_indel_header = args
 
     fit_repeat_indel_rates(
@@ -75,7 +87,16 @@ def characterize_repeat_indel_rates(args):
 
 
 def analyze_depth_distribution(args):
+    '''
+    For a given sample, analyze read depths.  Perform the following:
 
+    - Fit strand bias values to a log-normal distribution.
+    - Fit depth values to a normal distribution.
+    - Filter genome positions observing the normal distribution of depths.
+
+    Return the passed index and the standard deviation of the log-normal
+    distribution fit to strand bias values.
+    '''
     index, intermediate_files, reference_assembly, chrom_sizes = args
 
     samtools.run_mpileup(
@@ -108,7 +129,10 @@ def analyze_depth_distribution(args):
 
 def run_pipeline(reference_assembly, fastq_list, control_sample,
                  experiment_directory, p=1, excluded_regions=None):
-
+    '''
+    Run the MuVer pipeline considering input FASTQ files.  All files written
+    to the experiment directory.
+    '''
     pool = Pool(p)
 
     generate_experiment_directory(experiment_directory)

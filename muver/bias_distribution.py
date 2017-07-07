@@ -10,7 +10,14 @@ from wrappers import samtools
 
 
 def calculate_bias_distribution(_iter, ref_fn, output):
+    '''
+    For an iterable, create a histogram of strand bias values.  Then
+    fit those values using a log-normal distribution. Output parameters
+    for the fit and the histogram in a TXT file.
 
+    _iter may be generated using calculate_bias_distribution_bam or
+    calculate_bias_distribution_mpileup.
+    '''
     log_ratios = []
 
     for line in _iter:
@@ -101,13 +108,17 @@ def calculate_bias_distribution(_iter, ref_fn, output):
 
 
 def calculate_bias_distribution_bam(input_bam, ref_fn, output):
-
+    '''
+    Perform bias distribution characterization with a BAM file.
+    '''
     return calculate_bias_distribution(
         samtools.mpileup_iter(input_bam, ref_fn), ref_fn, output)
 
 
 def calculate_bias_distribution_mpileup(input_mpileup, ref_fn, output):
-
+    '''
+    Perform bias distribution characterization with an mpileup TXT file.
+    '''
     with open(input_mpileup) as f:
 
         return calculate_bias_distribution(

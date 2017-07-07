@@ -7,7 +7,10 @@ from repeat_indels import read_fits
 
 
 class Sample(object):
-
+    '''
+    Object to hold information for a given sample in MuVer, including
+    intermediate files.
+    '''
     def __init__(self, sample_name, fastqs=[], kwargs=dict(),
                  exp_dir=None):
 
@@ -67,7 +70,10 @@ class Sample(object):
             self.repeat_indel_fits_dict = read_fits(self.repeat_indel_fits)
 
     def read_cnv_bedgraph(self):
-
+        '''
+        Read in a bedGraph file to find ploidy at individual positions,
+        used later to overwrite sample-wide ploidy.
+        '''
         cnv_regions = dict()
 
         with open(self.cnv_bedgraph) as f:
@@ -86,7 +92,10 @@ class Sample(object):
         return cnv_regions
 
     def generate_intermediate_files(self):
-
+        '''
+        Generate named temporary files, and generate names for output files
+        based on the sample name. Both are then attributed to the object.
+        '''
         # GENERATE INTERMEDIATE FILES FOR EACH FASTQ
         def named_temp(suffix=''):
             return NamedTemporaryFile(
@@ -138,7 +147,10 @@ class Sample(object):
                 setattr(self, attr, named_file(file_dir, file_name))
 
     def get_intermediate_file_names(self):
-
+        '''
+        Iterate through object attributes and get temporary and output file
+        names.  Return in a dict.
+        '''
         file_names = dict()
 
         for attr, value in self.__dict__.items():
@@ -154,11 +166,14 @@ class Sample(object):
         return file_names
 
     def clear_temp_file_indices(self):
-
+        '''
+        Iterate through temporary files and delete any associated indices
+        created by outside files.
+        '''
         tempfile_names = []
 
         for attr, value in self.__dict__.items():
-            if attr.startswith('_'):
+            if attr.startswith('_'):  # '_' identifies temporary files
                 if isinstance(value, list):
                     tempfile_names.extend([tmp.name for tmp in value])
                 else:
@@ -179,7 +194,10 @@ class Sample(object):
 
 
 def read_samples_from_text(sample_info_fn, exp_dir=None):
-
+    '''
+    Iterate through an input file and use values to generate a list of sample
+    objects.
+    '''
     samples = []
 
     with open(sample_info_fn) as f:
@@ -213,7 +231,10 @@ def read_samples_from_text(sample_info_fn, exp_dir=None):
 
 
 def generate_experiment_directory(exp_dir):
-
+    '''
+    For a given parent directory, create necessary subdirectories for storing
+    output files if not found.
+    '''
     for sub_dir in [
         'bams',
         'logs',
@@ -230,7 +251,10 @@ def generate_experiment_directory(exp_dir):
 
 
 def write_sample_info_file(samples, output_file):
-
+    '''
+    Write sample attributes to an output TXT file that may be read in later to
+    generate a similar list of sample objects.
+    '''
     sample_info = dict()
 
     fields = (

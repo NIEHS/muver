@@ -10,7 +10,11 @@ from fitting import logistic
 
 def get_repeat_adjustment_value(unit_length, repeat_sequence_length,
                                  event_type, fits):
-
+    '''
+    Gives an expected frequency of observing an indel in a repeat for a given
+    repeat unit length and repeat tract length. Expects parameters from log-
+    transformed rates fit to a logistic function.
+    '''
     fit = fits[event_type][unit_length]
 
     return 10 ** min(0, logistic(
@@ -23,17 +27,22 @@ def get_repeat_adjustment_value(unit_length, repeat_sequence_length,
 
 
 def genotype_to_allele_counts(genotype, alleles):
+    '''
+    Finds the occurrences of each allele in a given genotype. Returns counts in
+    a dict.
+    '''
+    allele_counts = dict()
 
-      allele_counts = dict()
+    for allele in alleles:
+      allele_counts[allele] = genotype.count(allele)
 
-      for allele in alleles:
-          allele_counts[allele] = genotype.count(allele)
-
-      return allele_counts
+    return allele_counts
 
 
 def get_possible_genotypes(ploidy, alleles):
-
+    '''
+    For given ploidy and alleles, return a list of all possible genotypes.
+    '''
     possible_genotypes = []
 
     genotypes = [[]]
@@ -55,7 +64,9 @@ def get_possible_genotypes(ploidy, alleles):
 
 
 class Variant(object):
-
+    '''
+    Class for MuVer variants.
+    '''
     def __init__(self, chromosome, position, alleles, samples, ref_allele,
             control_sample, strand_allele_counts):
 
@@ -70,7 +81,10 @@ class Variant(object):
         self.get_sample_total_counts()
 
     def get_sample_total_counts(self):
-
+        '''
+        For each sample, go through strand allele counts and find the total
+        counts. Assign totals to self.sample_total_counts (dict).
+        '''
         self.sample_total_counts = dict()
         sac = self.strand_allele_counts
 
@@ -82,7 +96,9 @@ class Variant(object):
             self.sample_total_counts[sample] = total_counts
 
     def check_if_excluded(self, excluded_regions):
-
+        '''
+        Compare position to excluded regions. Assign overlap to excluded_flag.
+        '''
         pos = (self.chromosome, self.position)
         if excluded_regions:
             self.excluded_flag = pos in excluded_regions
@@ -90,21 +106,27 @@ class Variant(object):
             self.excluded_flag = False
 
     def check_depth_threshold(self, depth_threshold):
-
+        '''
+        For each sample, see if read depth is greater than the threshold.
+        '''
         self.depth_flags = dict()
         for sample in self.samples:
             self.depth_flags[sample] = \
                 self.sample_total_counts[sample] >= depth_threshold
 
     def check_filtered_sites(self, filtered_sites):
-
+        '''
+        For each sample, see if the position overlaps a filtered site.
+        '''
         self.filtered_sites_flags = dict()
         for sample in self.samples:
             self.filtered_sites_flags[sample] = \
                 (self.chromosome, self.position) in filtered_sites[sample]
 
     def check_allele_coverage(self):
-
+        '''
+        For each sample, flag if more than one allele has coverage.
+        '''
         self.allele_coverage_flags = dict()
         sac = self.strand_allele_counts
 
@@ -119,7 +141,10 @@ class Variant(object):
             self.allele_coverage_flags[sample] = count > 1
 
     def binomial_test(self):
-
+        '''
+        For each sample, perform binomial tests for each strand allele count
+        relative to control.
+        '''
         self.binomial_p_values = dict()
         sac = self.strand_allele_counts
         control_sum = self.sample_total_counts[self.control_sample]
@@ -153,7 +178,9 @@ class Variant(object):
                             1.0
 
     def chisquare_test(self):
-
+        '''
+        For each sample, perform chi-squared test relative to control.
+        '''
         self.chisquare_p_values = dict()
         sac = self.strand_allele_counts
         control_sum = self.sample_total_counts[self.control_sample]
@@ -187,7 +214,11 @@ class Variant(object):
                 self.chisquare_p_values[sample] = 1.0
 
     def check_if_significant(self, p_threshold):
-
+        '''
+        For each sample, consider binomial and chi-squared tests relative to
+        the p-value to determine if the genotype is significantly different
+        than the control.
+        '''
         self.sample_significance_flags = dict()
         self.sample_composite_p_values = dict()
 
@@ -221,7 +252,9 @@ class Variant(object):
             self.sample_significance_flags[sample] = significance_flag
 
     def assign_ploidy(self):
-
+        '''
+        For each sample, assign ploidy.
+        '''
         self.sample_ploidy = dict()
         position = (self.chromosome, self.position)
 
@@ -234,7 +267,9 @@ class Variant(object):
                         sample.cnv_regions[position]
 
     def intersect_with_repeats(self, repeats):
-
+        '''
+        Check if the position of the variant intersects with a repeat.
+        '''
         try:
             self.intersected_repeats = repeats[self.chromosome][self.position]
         except:
@@ -242,7 +277,10 @@ class Variant(object):
         self.intersect_repeat_flag = bool(self.intersected_repeats)
 
     def find_repeat_expanded_alleles(self):
-
+        '''
+        If the variant is left-aligned with a repeat, append the rest of the
+        repeat sequence to the allele, and assign to repeat_expanded_alleles.
+        '''
         self.intersected_repeat_unit = None
         self.intersected_repeat_added_sequence = None
         self.repeat_expanded_ref_allele = self.ref_allele
@@ -300,7 +338,10 @@ class Variant(object):
                         self.repeat_expanded_alleles[allele] = allele + to_add
 
     def call_genotypes_and_subclonal_alleles(self):
-
+        '''
+        Based on observed and expected allelic frequencies, call clonal and
+        subclonal genotypes.
+        '''
         self.sample_genotypes = dict()
         self.sample_genotype_min_log_ratio_sum = dict()
         self.sample_subclonal_alleles = dict()
@@ -480,7 +521,10 @@ class Variant(object):
                 }
 
     def subclonal_strand_bias_log_normal_test(self, samples):
-
+        '''
+        For the given subclonal call, check the strand balance given a log-
+        normal distribution.
+        '''
         self.sample_subclonal_bias_log_normal = dict()
 
         for sample in samples:
@@ -510,7 +554,10 @@ class Variant(object):
                 log_normal_p_value
 
     def subclonal_binomial_test(self):
-
+        '''
+        Perform binomial test for the subclonal allele comparing against the
+        frequency expected given the called genotype.
+        '''
         self.sample_subclonal_binomial = dict()
 
         for sample in self.samples:
@@ -545,7 +592,9 @@ class Variant(object):
             self.sample_subclonal_binomial[sample] = binomial_p_value
 
     def subclonal_strand_bias_binomial_test(self):
-
+        '''
+        Perform binomial test for strand bias in the subclonal allele.
+        '''
         self.sample_subclonal_bias_binomial = dict()
 
         for sample in self.samples:
@@ -575,7 +624,9 @@ class Variant(object):
             self.sample_subclonal_bias_binomial[sample] = binomial_p_value
 
     def get_all_possible_mutation_transitions(self):
-
+        '''
+        Given the observed alleles, create a list of all possible mutations.
+        '''
         mutations = []
 
         for allele_1 in self.alleles:
@@ -667,7 +718,9 @@ class Variant(object):
         return mutations
 
     def get_conversion_name(self, mutation):
-
+        '''
+        For conversions (transition from one allele to another), return a name.
+        '''
         start = self.position
         r = self.ref_allele
 
@@ -716,7 +769,9 @@ class Variant(object):
         return name
 
     def get_gain_name(self, gained_allele):
-
+        '''
+        For allele gain, return a name.
+        '''
         if not gained_allele:
             start = self.position
             end = start + len(self.ref_allele) - 1
@@ -732,7 +787,9 @@ class Variant(object):
             return('g.' + position + 'gain*')
 
     def get_loss_name(self, lost_allele):
-
+        '''
+        For allele loss, return a name.
+        '''
         if not lost_allele:
             start = self.position
             end = start + len(self.ref_allele) - 1
@@ -748,7 +805,9 @@ class Variant(object):
             return('g.' + position + 'loss*')
 
     def call_mutations(self):
-
+        '''
+        For each sample, call mutations.
+        '''
         # LOHs utilize ternary logic.  Here, None means 'ambiguous'.
         def loh_comparison(loh_1, loh_2):
 

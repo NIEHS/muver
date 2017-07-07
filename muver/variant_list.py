@@ -5,6 +5,11 @@ from utils import read_excluded_regions, read_repeats, read_filtered_sites
 
 
 def get_allele_values(alleles, in_dict):
+    '''
+    For a nested dict, where the first level has keys by allele and the second
+    level has keys by strand, return a flattened list of those values
+    respecting the order of the input allele list.
+    '''
     d = []
     for allele in alleles:
         for strand in ['forward', 'reverse']:
@@ -13,6 +18,9 @@ def get_allele_values(alleles, in_dict):
 
 
 def format_value(obj):
+    '''
+    Coerce the input object into a format amenable to legible printing.
+    '''
     if obj is None:
         return 'NA'
     elif type(obj) == bool:
@@ -26,7 +34,10 @@ def format_value(obj):
 
 
 def get_vcf_genotype(genotype, alleles, ploidy):
-
+    '''
+    Given the genotype, allele list, and ploidy, return the genotype in VCF
+    format.
+    '''
     if genotype:
         allele_indices = [str(alleles.index(a)) for a in genotype]
         return '/'.join(allele_indices)
@@ -35,7 +46,9 @@ def get_vcf_genotype(genotype, alleles, ploidy):
 
 
 def get_vcf_mutations(mutations):
-
+    '''
+    Format a list of mutations for writing to a VCF file.
+    '''
     if mutations:
         names = [m['name'] for m in mutations]
         return ','.join(names)
@@ -44,7 +57,9 @@ def get_vcf_mutations(mutations):
 
 
 def format_vcf_field(field):
-
+    '''
+    Coerce objects to a format for writing to a VCF file.
+    '''
     if field is None:
         return '.'
     elif type(field) == bool:
@@ -56,7 +71,9 @@ def format_vcf_field(field):
 
 
 def read_vcf_filter(flags):
-
+    '''
+    Given input flags, return a VCF filter field.
+    '''
     filters = []
     for flag, flag_name in flags:
         if flag:
@@ -69,7 +86,10 @@ def read_vcf_filter(flags):
 
 
 def write_vcf_info(f_field, f_id, f_number, f_type, f_description, OUT):
-
+    '''
+    Write a VCF header line to the OUT file. f_field, f_id, f_number, and
+    f_type correspond to fields specified in VCF documentation.
+    '''
     fields = []
     for field, value in (
         ('ID', f_id),
@@ -86,7 +106,10 @@ def write_vcf_info(f_field, f_id, f_number, f_type, f_description, OUT):
 
 
 class VariantList(object):
-
+    '''
+    In addition to containing a list of variants, also contains other
+    information for a MuVer run.
+    '''
     def __init__(self, input_vcf_fn, samples, excluded_regions_fn, repeats_fn,
                  control_sample, chrom_sizes, depth_threshold=20):
 
@@ -136,7 +159,10 @@ class VariantList(object):
         return iter(self.variants)
 
     def read_variants_from_vcf(self):
-
+        '''
+        Iterates through a GATK HaplotypeCaller VCF and creates a variant for
+        each entry.
+        '''
         with open(self.input_vcf_fn) as f:
             for line in f:
 
@@ -192,7 +218,9 @@ class VariantList(object):
                         self.samples, ref, self.control_sample, sac))
 
     def write_output_table(self, output_fn):
-
+        '''
+        Writes a line to an output file for each variant in the variant list.
+        '''
         output_headers = [
             'Chromosome',
             'Position',
@@ -285,7 +313,9 @@ class VariantList(object):
                 OUTPUT.write('\t'.join([format_value(x) for x in variant_fields]) + '\n')
 
     def write_output_vcf(self, output_fn):
-
+        '''
+        Writes a VCF file describing variants in the list.
+        '''
         samples = [self.control_sample] + \
             [s for s in self.samples if s != self.control_sample]
 

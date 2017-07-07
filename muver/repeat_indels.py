@@ -9,7 +9,16 @@ from wrappers.samtools import view_bam
 
 
 def calculate_repeat_occurrences(repeats):
+    '''
+    Iterate through a repeats dictionary. Count the number of occurrences of
+    repeats of a given repeat unit length and repeat tract length. Return as
+    dict.
 
+    Only count full occurrences of a given repeat unit, ignoring trailing
+    bases.
+
+    e.g. GAGAGAGAG -- repeat_unit_length: 2, repeat_tract_length: 8
+    '''
     occurrences = defaultdict(int)
 
     for chromosome_repeats in repeats.values():
@@ -28,7 +37,11 @@ def calculate_repeat_occurrences(repeats):
 
 
 def calculate_repeat_indel_counts(repeats, sam_iter):
-
+    '''
+    Iterating through a BAM/SAM file, count the number of indels with repeats,
+    noting the repeat unit length and repeat tract length. Return as dict
+    with overall depth counts and insertion and deletion counts.
+    '''
     counts = dict()
     for field in ['depth', 'insertion', 'deletion']:
         counts[field] = dict()
@@ -159,7 +172,15 @@ def calculate_repeat_indel_counts(repeats, sam_iter):
 
 def calculate_repeat_indel_rates(indel_counts, repeat_occurrences,
                                  occurrence_filter=10):
+    '''
+    Considering overall depth counts, find the rates for insertions and
+    deletions within repeats. Store values as a function of repeat length and
+    repeat tract length.
 
+    Do not report a rate if repeats of a given repeat unit length and repeat
+    tract length appear fewer times than the occurrence filter. Read these
+    occurrences from the repeat_occurrences dict.
+    '''
     rates = dict()
     for field in ['insertion', 'deletion']:
         rates[field] = dict()
@@ -182,7 +203,10 @@ def calculate_repeat_indel_rates(indel_counts, repeat_occurrences,
 
 
 def fit_rates(indel_rates):
-
+    '''
+    Considering repeats of a given repeat unit length, fit rates to a logistic
+    function of repeat tract length.  Return fit parameters in a dict.
+    '''
     fits = dict()
 
     for event in ['insertion', 'deletion']:
@@ -232,7 +256,11 @@ def fit_rates(indel_rates):
 
 
 def plot_fits(indel_rates, fits, output_header):
-
+    '''
+    Considering logistic function fits, compare fit values to observed rates.
+    Fit values and observed rates are reported in scatter plots written to PNG
+    files named using output_header.
+    '''
     for event, event_fits in fits.items():
         for repeat_length, repeat_fit in event_fits.items():
 
@@ -269,7 +297,10 @@ def plot_fits(indel_rates, fits, output_header):
 
 
 def print_fits(fits, output_file):
-
+    '''
+    Print parameters from logistic function fits in the input dict to an output
+    file.
+    '''
     ordered_fits = []
 
     for event in ('insertion', 'deletion'):
@@ -294,7 +325,9 @@ def print_fits(fits, output_file):
 
 
 def read_fits(fits_file):
-
+    '''
+    Read logistic function parameters from a tab-delimited TXT file.
+    '''
     fits = dict()
 
     with open(fits_file) as f:
@@ -316,7 +349,15 @@ def read_fits(fits_file):
 
 def fit_repeat_indel_rates(repeats, bam_file, output_file,
                                     output_plot_header=None):
-
+    '''
+    Considering a dictionary of repeats, iterate through a BAM/SAM file and
+    record occurrences of indels within repeat sequences. Then, find rates
+    of indel occurrences as a function of repeat unit length and repeat tract
+    length. For each repeat unit length, fit observed rates as a function of
+    repeat tract length to a logistic function. Write the parameters of these
+    fits to an output file. If output_plot_header is specified, plot fitted
+    values for visual validation.
+    '''
     bam_iter = view_bam(bam_file)
 
     repeat_occurrences = calculate_repeat_occurrences(repeats)

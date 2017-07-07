@@ -7,7 +7,13 @@ import variant_list
 
 def call_variants(reference_assembly, control_sample, sample_list, input_vcf,
                   output_header, chrom_sizes=None, excluded_regions=None):
+    '''
+    Using a reference assembly, sample list, and VCF file from GATK
+    HaplotypeCaller, call mutations.
 
+    chrom_sizes -- If specified, chromosome sizes are taken from here.
+    excluded_regions -- Regions to exclude from variant calling (BED format).
+    '''
     samples = sample.read_samples_from_text(sample_list)
     control_sample = next(
         (x for x in samples if x.sample_name == control_sample),

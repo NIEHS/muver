@@ -5,11 +5,18 @@ import regex as re
 
 
 def reverse_enumerate(iterable):
+    '''
+    Enumerate through an iterable in reverse, reporting the index consistent
+    with the original iterable.
+    '''
     return itertools.izip(reversed(xrange(len(iterable))), reversed(iterable))
 
 
 def generate_repeat_units():
-
+    '''
+    Given canonical bases, generate a set of all possible repeat units up to
+    a length of four.
+    '''
     bases = ['A', 'C', 'G', 'T']
     repeat_units = set(copy.copy(bases))
 
@@ -38,7 +45,12 @@ def generate_repeat_units():
 
 
 def check_repeats(repeat_1, repeat_2):
+    '''
+    Check to see if repeat_1 is a possible permutation of repeat_2.
 
+    e.g. check_repeats('AGCT', 'GCTA') is True, check_repeats('AGCT', 'ATGC')
+    is False.
+    '''
     if repeat_1 == repeat_2:
 
         return True
@@ -56,7 +68,9 @@ def check_repeats(repeat_1, repeat_2):
 
 
 def create_repeat_file(fasta_file, output_file):
-
+    '''
+    For a given FASTA file, enumerate all repeats to an output file.
+    '''
     repeat_units = generate_repeat_units()
     sequences = OrderedDict()
     seq_name = None
