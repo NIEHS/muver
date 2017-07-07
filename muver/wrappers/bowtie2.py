@@ -1,5 +1,4 @@
 import os
-import sys
 
 from __init__ import PATHS, quiet_call
 
@@ -57,7 +56,6 @@ def build(ref_fn):
         os.path.isfile(ref_fn + '.rev.1.bt2') and
         os.path.isfile(ref_fn + '.rev.2.bt2')
     ):
-        sys.stdout.write('Bowtie2 index not found: Building.\n')
         quiet_call([
             PATHS['bowtie2_build'],
             ref_fn,
