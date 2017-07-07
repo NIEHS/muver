@@ -11,6 +11,7 @@ from depth_correction import write_corrected_bedgraph
 from depth_distribution import (calculate_depth_distribution_bedgraph,
                                 filter_regions_by_depth_bedgraph)
 from pipeline import run_pipeline as _run_pipeline
+from reference import read_chrom_sizes_from_file
 from repeat_indels import fit_repeat_indel_rates as _fit_repeat_indel_rates
 from repeats import create_repeat_file as _create_repeat_file
 from utils import read_repeats
@@ -199,10 +200,11 @@ def calculate_depth_distribution(bedgraph_file, chrom_sizes_file,
         bedgraph_file,
         output_depth_distribution,
     )
+    chrom_sizes = read_chrom_sizes_from_file(chrom_sizes_file)
     if output_filtered_regions:
         filter_regions_by_depth_bedgraph(
             bedgraph_file,
-            chrom_sizes_file,
+            chrom_sizes,
             mu,
             sigma,
             output_filtered_regions,
