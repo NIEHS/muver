@@ -1,21 +1,18 @@
-#!/usr/bin/env python
-
-import os
-import argparse
-import tempfile
 from itertools import repeat
 from multiprocessing import Pool
+import os
 
-import reference, read_processing
-from wrappers import bowtie2, gatk, picard, samtools
 import bias_distribution as bias_dist
 import depth_distribution as depth_dist
+import read_processing
+import reference
+from repeat_indels import fit_repeat_indel_rates, read_fits
+from repeats import create_repeat_file
 from sample import (Sample, read_samples_from_text,
                     generate_experiment_directory, write_sample_info_file)
-from variant_list import VariantList
 from utils import read_repeats
-from repeats import create_repeat_file
-from repeat_indels import fit_repeat_indel_rates, read_fits
+from variant_list import VariantList
+from wrappers import bowtie2, gatk, picard, samtools
 
 
 def process_sams(args):

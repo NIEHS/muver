@@ -1,9 +1,4 @@
-#!/usr/bin/env python
-
 import math
-import argparse
-import subprocess
-from collections import defaultdict
 
 
 #  TODO: move to utils
@@ -48,16 +43,21 @@ def write_corrected_bedgraph(input_bedgraph, chrom_sizes_fn, output_bedgraph,
             end = int(end)
 
             for position in range(start, end + 1):
-                relative_pos = min(position - 1, chrom_sizes[chromosome] - position)
+                relative_pos = min(
+                    position - 1, chrom_sizes[chromosome] - position)
                 if relative_pos == 0:
                     relative_pos = 1
 
-                corr = float(coverage) / \
-                    (scalar * (0.5 + 0.5 * math.erf((mean_log - math.log(relative_pos)) / \
-                    (math.sqrt(2) * sd_log))) + y_int + (slope * relative_pos))
+                corr = float(coverage) / (
+                    scalar * (
+                        math.erf((mean_log - math.log(relative_pos)) /
+                        (math.sqrt(2) * sd_log))
+                    ) + y_int + (slope * relative_pos)
+                )
                 value = int(round(corr, 0))
 
-                if chromosome == last_chr and coverage == last_val and position == last_pos + 1:
+                if chromosome == last_chr and coverage == last_val and \
+                        position == last_pos + 1:
                     end = position
                 else:
                     print_line(last_chr, start, end, last_val, OUT)

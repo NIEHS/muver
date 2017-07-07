@@ -1,11 +1,7 @@
-import re
-import csv
-import sys
-import math
-import argparse
-
-import matplotlib.pyplot as plt
 from collections import defaultdict
+import csv
+import matplotlib.pyplot as plt
+import re
 from scipy.optimize import curve_fit
 
 from fitting import logistic

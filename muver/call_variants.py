@@ -1,11 +1,9 @@
 import os
-import argparse
-import tempfile
 
 import reference
 import sample
-import variant_list
 from utils import read_from_distribution
+import variant_list
 
 
 def call_variants(reference_assembly, control_sample, sample_list, input_vcf,

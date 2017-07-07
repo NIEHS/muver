@@ -1,5 +1,3 @@
-#  Remove SAM entries where paired reads align to different
-#  chromosomes
 def remove_diff_chr_pairs(in_sam, out_sam):
 
     with open(in_sam) as in_file, open(out_sam, 'w') as OUTPUT:

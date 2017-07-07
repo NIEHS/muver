@@ -1,37 +1,11 @@
-import re
-import sys
+from collections import defaultdict, OrderedDict
 import copy
 import math
-
+import re
 from scipy.stats import binom, chi2
-from collections import defaultdict, OrderedDict
+import sys
 
 from fitting import logistic
-
-# MATRIX = {
-#     'deletion': {
-#         1: [0.00012939, 0.17239, 0.68843, 0.79389, 0.043198],
-#         2: [0.00012939, 0.18594, 0.46491, 0.86607, 0.043198],
-#         3: [0.00012939, 0.056286, 0.48906, 0.86558, 0.043198],
-#         4: [0.00012939, 0.010154, 0.53597, 1.1236, 0.043198],
-#     },
-#
-#     'insertion': {
-#         1: [0.000070429, 0.13839, 1.0247, 0.76514, 0.73123],
-#         2: [0.000070429, 0.089333, 0.69242, 1.1379, 0.73123],
-#         3: [0.000070429, 0.013282, 0.74639, 1.2246, 0.73123],
-#         4: [0.0, 0.0, 0.0, 1.0, 0.0],
-#     },
-# }
-
-
-# def get_repeat_adjustment_value(unit_length, repeat_sequence_length,
-#                                 event_type, fits):
-#
-#     a, b, c, d, e = MATRIX[event_type][unit_length]
-#     r = repeat_sequence_length
-#
-#     return a + ((b - a) / ((1 + (100000.0 * e) * math.exp(-c * r)) ** (1.0 / d)))
 
 
 def get_repeat_adjustment_value(unit_length, repeat_sequence_length,
@@ -279,23 +253,29 @@ class Variant(object):
 
         if self.intersected_repeats:
 
-            left_aligned_repeats = \
-                [r for r in self.intersected_repeats if r['start'] == self.position]
+            left_aligned_repeats = [r for r in self.intersected_repeats
+                if r['start'] == self.position]
 
             if left_aligned_repeats:
 
-                repeat = sorted(left_aligned_repeats, key=lambda x: len(x['unit']))[0]
+                repeat = sorted(
+                    left_aligned_repeats, key=lambda x: len(x['unit']))[0]
 
                 expand = False
-                for allele in [a for a in self.alleles if a != self.ref_allele]:
+                for allele in [a for a in self.alleles
+                        if a != self.ref_allele]:
                     if len(allele) != self.ref_allele:
 
                         repeat_insertion = \
-                            re.match(allele + '(' + repeat['unit'] + ')+',
-                                self.ref_allele)
+                            re.match(
+                                allele + '(' + repeat['unit'] + ')+',
+                                self.ref_allele,
+                            )
                         repeat_deletion = \
-                            re.match(self.ref_allele + '(' + repeat['unit'] + ')+',
-                                allele)
+                            re.match(
+                                self.ref_allele + '(' + repeat['unit'] + ')+',
+                                allele,
+                            )
 
                         if repeat_insertion or repeat_deletion:
                             expand = True
@@ -333,7 +313,8 @@ class Variant(object):
 
                 ploidy = self.sample_ploidy[sample]
                 allele_counts = self.strand_allele_counts[sample]
-                possible_genotypes = get_possible_genotypes(ploidy, self.alleles)
+                possible_genotypes = get_possible_genotypes(
+                    ploidy, self.alleles)
 
                 observed_allele_frequencies = dict()
                 total_sample_counts = 0
@@ -344,7 +325,8 @@ class Variant(object):
                         observed_allele_frequencies[allele] += max(value, 1)
                         total_sample_counts += value
                 for allele, frequency in observed_allele_frequencies.items():
-                    observed_allele_frequencies[allele] = float(frequency) / total_sample_counts
+                    observed_allele_frequencies[allele] = \
+                        float(frequency) / total_sample_counts
 
                 expected_allele_frequencies = OrderedDict()
                 eaf = expected_allele_frequencies
@@ -372,7 +354,10 @@ class Variant(object):
                                 subclonal_genotype = list(genotype)
                                 subclonal_genotype[i] = subclonal_allele
 
-                                _sorted = tuple(sorted(subclonal_genotype, key=lambda x: self.alleles.index(x)))
+                                _sorted = tuple(sorted(
+                                    subclonal_genotype,
+                                    key=lambda x: self.alleles.index(x),
+                                ))
                                 if _sorted not in subclonal_genotypes:
                                     subclonal_genotypes.append(_sorted)
 
@@ -408,7 +393,8 @@ class Variant(object):
                             re_allele = self.repeat_expanded_alleles[allele]
 
                             plus_one = re_allele + self.intersected_repeat_unit
-                            minus_one = re_allele.replace(self.intersected_repeat_unit, '', 1)
+                            minus_one = re_allele.replace(
+                                self.intersected_repeat_unit, '', 1)
 
                             unit_length = len(self.intersected_repeat_unit)
                             repeat_sequence_length = unit_length * \

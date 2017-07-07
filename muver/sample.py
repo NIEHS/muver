@@ -1,9 +1,6 @@
-#!/usr/bin/env python
-
-import os
 import csv
 import glob
-
+import os
 from tempfile import NamedTemporaryFile
 
 from repeat_indels import read_fits
@@ -24,9 +21,6 @@ class Sample(object):
             'cnv_bedgraph',
             'cnv_regions',
             'strand_bias_std',
-            # 'recalibration_log',
-            # 'recalibration_print_log',
-            # 'recalibrated_bam',
             'filtered_sites',
             'strand_bias_distribution',
             'depth_distribution',
@@ -34,7 +28,6 @@ class Sample(object):
             'repeat_indel_fits',
             'repeat_indel_fits_dict',
             'merged_bam',
-            # '_recalibration_table',
             '_mpileup_out',
         ):
             setattr(self, attr, None)
@@ -120,8 +113,6 @@ class Sample(object):
                 setattr(self, attr, [named_temp(suffix=suffix) for i in n])
 
             for attr, suffix in (
-                # ('_merged_bam', '.bam'),
-                # ('_recalibration_table', ''),
                 ('_mpileup_out', '.txt'),
             ):
                 setattr(self, attr, named_temp(suffix=suffix))
@@ -132,12 +123,6 @@ class Sample(object):
                     [named_file('logs', log) for log in realignment_logs])
 
             for attr, file_dir, file_name in (
-                # ('recalibration_log', 'logs',
-                #     '{}.recalibration.log'),
-                # ('recalibration_print_log', 'logs',
-                #     '{}.recalibration_print.log'),
-                # ('recalibrated_bam', 'bams',
-                #     '{}.bam'),
                 ('merged_bam', 'bams', '{}.bam'),
                 ('filtered_sites', 'filtered_sites',
                     '{}.filtered_sites.txt'),
@@ -257,9 +242,6 @@ def write_sample_info_file(samples, output_file):
         'Depth Distribution',
         'Strand Bias Distribution',
         'Merged Bam',
-        # 'Realignment Logs',
-        # 'Recalibration Log',
-        # 'Recalibration Print Log',
     )
 
     for sample in samples:

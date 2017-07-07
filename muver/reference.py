@@ -1,8 +1,3 @@
-import os
-import sys
-from subprocess import call
-
-from wrappers.bowtie2 import build
 from wrappers import bowtie2, picard, samtools
 
 

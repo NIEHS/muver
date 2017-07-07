@@ -1,12 +1,8 @@
-#!/usr/bin/env python
-
 import numpy
-import argparse
 from scipy.stats import norm
 from scipy.optimize import curve_fit
 
 from fitting import gaussian
-from reference import read_chrom_sizes_from_file
 
 
 def calculate_depth_distribution(depths, output):
@@ -106,9 +102,20 @@ def process_chromosome_values(chromosome, chromosome_values, mu, sigma, OUT,
 
         window_depth = numpy.mean(chromosome_values[i - d:i + d + 1])
 
-        if not (window_depth >= keep_threshold[0] and window_depth <= keep_threshold[1]):
-            if window_depth <= filter_threshold[0] and window_depth >= filter_threshold[1]:
-                write_position_to_filter(chromosome, str(i + 1), str(chromosome_values[i]), p)
+        if not (
+            window_depth >= keep_threshold[0] and
+            window_depth <= keep_threshold[1]
+        ):
+            if (
+                window_depth <= filter_threshold[0] and
+                window_depth >= filter_threshold[1]
+            ):
+                write_position_to_filter(
+                    chromosome,
+                    str(i + 1),
+                    str(chromosome_values[i]),
+                    p,
+                )
             else:
                 if window_depth < mu:
                     p = norm_dist.cdf(window_depth)
@@ -117,7 +124,12 @@ def process_chromosome_values(chromosome, chromosome_values, mu, sigma, OUT,
                         keep_threshold[0] = window_depth
                     else:
                         filter_threshold[0] = window_depth
-                        write_position_to_filter(chromosome, str(i + 1), str(chromosome_values[i]), p)
+                        write_position_to_filter(
+                            chromosome,
+                            str(i + 1),
+                            str(chromosome_values[i]),
+                            p,
+                        )
 
                 elif window_depth > mu:
                     p = 1. - norm_dist.cdf(window_depth)
@@ -126,7 +138,12 @@ def process_chromosome_values(chromosome, chromosome_values, mu, sigma, OUT,
                         keep_threshold[1] = window_depth
                     else:
                         filter_threshold[1] = window_depth
-                        write_position_to_filter(chromosome, str(i + 1), str(chromosome_values[i]), p)
+                        write_position_to_filter(
+                            chromosome,
+                            str(i + 1),
+                            str(chromosome_values[i]),
+                            p,
+                        )
 
 
 def filter_regions_by_depth(depths, chrom_sizes, mu, sigma,
@@ -152,54 +169,14 @@ def filter_regions_by_depth(depths, chrom_sizes, mu, sigma,
             for __ in range(last_pos + 1, chrom_sizes[chromosome] + 1):
                 chromosome_values.append(0)
 
-            process_chromosome_values(chromosome, chromosome_values, mu, sigma,
-                OUT)
-        #
-        #
-        # last_chr = None
-        # last_pos = 0
-        #
-        # for line in f:
-        #     chromosome, start, end, coverage = line.strip().split()
-        #     start = int(start) + 1  # Convert from zero-based
-        #     end = int(end)
-        #     coverage = int(coverage)
-        #
-        #     if last_chr != chromosome:
-        #         if last_chr:
-        #             if last_pos < chrom_sizes[last_chr]:
-        #                 for __ in range(last_pos + 1, chrom_sizes[last_chr] + 1):
-        #                     chromosome_values.append(0)
-        #             process_chromosome_values(last_chr, chromosome_values, mu, sigma, OUT)
-        #
-        #         chromosome_values = []
-        #         last_pos = 0
-        #
-        #     for __ in range(last_pos + 1, start):
-        #         chromosome_values.append(0)
-        #
-        #     for __ in range(start, end + 1):
-        #         chromosome_values.append(coverage)
-        #
-        #     last_pos = end
-        #     last_chr = chromosome
-        #
-        # if last_chr:
-        #     if last_pos < chrom_sizes[last_chr]:
-        #         for __ in range(last_pos + 1, chrom_sizes[last_chr] + 1):
-        #             chromosome_values.append(0)
-        #     process_chromosome_values(last_chr, chromosome_values, mu, sigma, OUT)
+            process_chromosome_values(
+                chromosome, chromosome_values, mu, sigma, OUT)
 
 
 def filter_regions_by_depth_bedgraph(bedgraph_file, chrom_sizes, mu,
                                      sigma, filtered_regions_output):
-
-    #  chrom_sizes = read_chrom_sizes(chrom_sizes_file)
-    #  norm_dist = norm(mu, sigma)
-
     depths = dict()
 
-    #  with open(bedgraph_file) as f, open(filtered_regions_output, 'w') as OUT:
     with open(bedgraph_file) as f:
         for line in f:
 
@@ -219,41 +196,6 @@ def filter_regions_by_depth_bedgraph(bedgraph_file, chrom_sizes, mu,
 
     filter_regions_by_depth(depths, chrom_sizes, mu, sigma,
         filtered_regions_output)
-
-
-        #  last_chr = None
-        #  last_pos = 0
-         #
-        #  for line in f:
-        #      chromosome, start, end, coverage = line.strip().split()
-        #      start = int(start) + 1  # Convert from zero-based
-        #      end = int(end)
-        #      coverage = int(coverage)
-         #
-        #      if last_chr != chromosome:
-        #          if last_chr:
-        #              if last_pos < chrom_sizes[last_chr]:
-        #                  for __ in range(last_pos + 1, chrom_sizes[last_chr] + 1):
-        #                      chromosome_values.append(0)
-        #              process_chromosome_values(last_chr, chromosome_values, mu, sigma, OUT)
-         #
-        #          chromosome_values = []
-        #          last_pos = 0
-         #
-        #      for __ in range(last_pos + 1, start):
-        #          chromosome_values.append(0)
-         #
-        #      for __ in range(start, end + 1):
-        #          chromosome_values.append(coverage)
-         #
-        #      last_pos = end
-        #      last_chr = chromosome
-         #
-        #  if last_chr:
-        #      if last_pos < chrom_sizes[last_chr]:
-        #          for __ in range(last_pos + 1, chrom_sizes[last_chr] + 1):
-        #              chromosome_values.append(0)
-        #      process_chromosome_values(last_chr, chromosome_values, mu, sigma, OUT)
 
 
 def filter_regions_by_depth_mpileup(mpileup_file, chrom_sizes, mu,

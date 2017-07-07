@@ -1,27 +1,12 @@
-#!/usr/bin/env python
-
-import os
-import re
+from collections import defaultdict
 import math
 import numpy
-import argparse
-import subprocess
-import ConfigParser
-from numpy import histogram
+import re
 from scipy.stats import norm
 from scipy.optimize import curve_fit
-from collections import defaultdict
 
 from fitting import gaussian
 from wrappers import samtools
-
-
-paths = dict()
-config = ConfigParser.ConfigParser()
-config.read(os.path.join(
-    os.path.dirname(os.path.abspath(__file__)), '..', 'config/paths.cfg'))
-for key, value in config.items('paths'):
-    paths[key] = value
 
 
 def calculate_bias_distribution(_iter, ref_fn, output):
@@ -98,7 +83,8 @@ def calculate_bias_distribution(_iter, ref_fn, output):
     with open(output, 'w') as OUT:
 
         OUT.write('Average log ratio: {}\n'.format(str(mu)))
-        OUT.write('Standard deviation of log ratios: {}\n\n'.format(str(sigma)))
+        OUT.write(
+            'Standard deviation of log ratios: {}\n\n'.format(str(sigma)))
 
         OUT.write('Bias distribution:\n\n')
         OUT.write('\t'.join(['Strand log ratio', 'Frequency', 'Fit value']) +

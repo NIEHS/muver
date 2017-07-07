@@ -1,9 +1,7 @@
-import copy
-import argparse
-import regex as re
-import itertools
-
 from collections import OrderedDict
+import copy
+import itertools
+import regex as re
 
 
 def reverse_enumerate(iterable):
@@ -124,10 +122,12 @@ def create_repeat_file(fasta_file, output_file):
 
                 for other_match in reversed(sort[:i]):
 
-                    if match['start'] >= other_match['start'] and \
-                            match['end'] <= other_match['end'] and \
-                            check_repeats(match['repeat_unit'], other_match['repeat_unit']):
-
+                    if (
+                        match['start'] >= other_match['start'] and
+                        match['end'] <= other_match['end'] and
+                        check_repeats(
+                            match['repeat_unit'], other_match['repeat_unit'])
+                    ):
                         keep = False
                         break
 
