@@ -1,30 +1,6 @@
 import subprocess
 
 
-# def read_cnv_files(file_list):
-#
-#     cnv_regions = dict()
-#
-#     with open(file_list) as _list:
-#         for entry in _list:
-#
-#             sample, fn = entry.strip().split()
-#             ploidy_locus_table[sample] = dict()
-#
-#             with open(fn) as f:
-#                 for line in f:
-#                     chromosome, start, end, ploidy = line.strip().split()
-#
-#                     start = int(start) + 1
-#                     end = int(end)
-#
-#                     for i in range(start, end + 1):
-#                         ploidy_locus_table[sample][(chromosome, str(i))] = \
-#                             ploidy
-#
-#     return ploidy_locus_table
-#
-
 def read_excluded_regions(excluded_regions_fn):
     excluded_regions = set()
 
@@ -92,32 +68,6 @@ def read_repeats(repeats_fn):
                         }]
 
     return repeats
-
-
-def read_fits(fits_fn):
-
-    fits = dict()
-
-    with open(fits_fn) as f:
-        for line in f:
-            sample, depth_mean, depth_stdev, strand_bias_stdev = line.strip().split()
-            fits[sample] = {
-                'depth_mean': float(depth_mean),
-                'depth_stdev': float(depth_stdev),
-                'strand_bias_stdev': float(strand_bias_stdev),
-            }
-
-    return fits
-
-
-def read_from_distribution(distribution_fn):
-
-    with open(distribution_fn) as f:
-
-        mean = float(f.next().split(':')[1].strip())
-        std = float(f.next().split(':')[1].strip())
-
-    return mean, std
 
 
 def get_mpileup_output(in_bam, ref_fn, out_txt):

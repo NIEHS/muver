@@ -2,7 +2,6 @@ import os
 
 import reference
 import sample
-from utils import read_from_distribution
 import variant_list
 
 

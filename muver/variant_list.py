@@ -1,8 +1,7 @@
 import math
 
 from variant import Variant
-from utils import (read_cnv_files, read_excluded_regions, read_chrom_sizes,
-    read_repeats, read_filtered_sites)
+from utils import read_excluded_regions, read_repeats, read_filtered_sites
 
 
 def get_allele_values(alleles, in_dict):
