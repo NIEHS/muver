@@ -582,9 +582,8 @@ class Variant(object):
                 binomial_p_value = binom.cdf(
                     sample_sum - f - r,
                     sample_sum,
-                    1.0 - eaf[genotype, subclonal][subclonal_allele],
+                    1.0 - eaf[genotype, (None, None, None)][subclonal_allele],
                 )
-
             else:
                 binomial_p_value = None
 
