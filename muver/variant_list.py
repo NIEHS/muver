@@ -288,7 +288,7 @@ class VariantList(object):
                 for sample in [s for s in self.samples if s != self.control_sample]:
 
                     muts = v.sample_called_mutations[sample]
-                    if muts and v.sample_significance_flags[sample]:
+                    if muts and v.report_mutations[sample]:
                         sample_mutations = [m['name'] for m in muts]
                         sample_called_loh = v.sample_called_loh[sample]
                     else:
@@ -415,18 +415,16 @@ class VariantList(object):
                     sample_fields.append(format_vcf_field(
                         variant.sample_subclonal_valid_flag[sample]))
 
-                    if sample in variant.sample_called_mutations and \
-                            sample in variant.sample_called_loh:
-
+                    if sample != self.control_sample:
                         sample_fields.append(format_vcf_field(
                             variant.sample_significance_flags[sample]))
-                        sample_fields.append(get_vcf_mutations(
-                            variant.sample_called_mutations[sample]))
-                        sample_fields.append(format_vcf_field(
-                            variant.sample_called_loh[sample]))
-
-                    else:
-                        sample_fields.extend(['.'] * 3)
+                        if variant.report_mutations[sample]:
+                            sample_fields.append(get_vcf_mutations(
+                                variant.sample_called_mutations[sample]))
+                            sample_fields.append(format_vcf_field(
+                                variant.sample_called_loh[sample]))
+                        else:
+                            sample_fields.extend(['.'] * 2)
 
                     variant_fields.append(':'.join(sample_fields))
 
