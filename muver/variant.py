@@ -369,8 +369,8 @@ class Variant(object):
                     observed_allele_frequencies[allele] = \
                         float(frequency) / total_sample_counts
 
-                expected_allele_frequencies = OrderedDict()
-                eaf = expected_allele_frequencies
+                self.expected_allele_frequencies = OrderedDict()
+                eaf = self.expected_allele_frequencies
 
                 #  No subclonal
                 for genotype in possible_genotypes:
@@ -423,7 +423,7 @@ class Variant(object):
 
                     fits = sample.repeat_indel_fits_dict
 
-                    for frequencies in expected_allele_frequencies.values():
+                    for frequencies in self.expected_allele_frequencies.values():
 
                         frequency_adjustment_values = dict()
 
@@ -466,14 +466,14 @@ class Variant(object):
                         for allele, adj in frequency_adjustment_values.items():
                             frequencies[allele] += adj
 
-                for frequencies in expected_allele_frequencies.values():
+                for frequencies in self.expected_allele_frequencies.values():
                     for allele, frequency in frequencies.items():
                         frequencies[allele] = max(frequency, 2.0 / total_sample_counts)
 
                 min_log_ratio_sum = float('inf')
                 max_shared_count = 0
 
-                for key, ef in expected_allele_frequencies.items():
+                for key, ef in self.expected_allele_frequencies.items():
                     genotype, subclonal = key
                     log_ratio_sum = 0
                     shared_count = 0
@@ -565,6 +565,7 @@ class Variant(object):
 
             subclonal = self.sample_subclonal_alleles[sample]
             genotype = self.sample_genotypes[sample]
+            eaf = self.expected_allele_frequencies[sample]
             allele_counts = self.strand_allele_counts[sample]
 
             if subclonal:
@@ -577,13 +578,10 @@ class Variant(object):
                 for counts in allele_counts.values():
                     sample_sum += sum(counts.values())
 
-                genotype_allele_frequency = \
-                    float(genotype.count(subclonal_allele)) / len(genotype)
-
                 binomial_p_value = binom.cdf(
                     sample_sum - f - r,
                     sample_sum,
-                    1.0 - genotype_allele_frequency,
+                    1.0 - eaf[genotype, subclonal][subclonal_allele],
                 )
 
             else:
