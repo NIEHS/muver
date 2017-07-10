@@ -1030,3 +1030,38 @@ class Variant(object):
 
                 self.sample_called_mutations[sample] = None
                 self.sample_called_loh[sample] = None
+
+    def set_report_mutations_flag(self, p_threshold):
+        '''
+        Check object attributes to see if a mutation should be reported.
+
+        To be reported, the following must be true:
+
+        - Not within excluded regions.
+        - Control and sample not in a filtered region.
+        - Control and sample above depth threshold.
+        - The control subclonal strand bias log-normal p-value is not less than
+            threshold.
+        - More than one allele/strand pair displays read coverage.
+        - Passes the significance threshold.
+        '''
+        self.report_mutations = dict()
+
+        if self.sample_subclonals[self.control_sample]['genotype']:
+            p = self.sample_subclonal_bias_log_normal[self.control_sample]
+            control_subclonal_check = p >= p_threshold
+        else:
+            control_subclonal_check = True
+
+        for sample in self.sample_called_mutations:
+            self.report_mutations[sample] = all([
+                not self.excluded_flag,
+                not self.filtered_sites_flags[sample],
+                not self.filtered_sites_flags[self.control_sample],
+                self.depth_flags[sample],
+                self.depth_flags[self.control_sample],
+                control_subclonal_check,
+                self.allele_coverage_flags[sample],
+                self.sample_significance_flags[sample],
+            ])
+
