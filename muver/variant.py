@@ -342,6 +342,7 @@ class Variant(object):
         Based on observed and expected allelic frequencies, call clonal and
         subclonal genotypes.
         '''
+        self.expected_allele_frequencies = dict()
         self.sample_genotypes = dict()
         self.sample_genotype_min_log_ratio_sum = dict()
         self.sample_subclonal_alleles = dict()
@@ -369,8 +370,8 @@ class Variant(object):
                     observed_allele_frequencies[allele] = \
                         float(frequency) / total_sample_counts
 
-                self.expected_allele_frequencies = OrderedDict()
-                eaf = self.expected_allele_frequencies
+                self.expected_allele_frequencies[sample] = OrderedDict()
+                eaf = self.expected_allele_frequencies[sample]
 
                 #  No subclonal
                 for genotype in possible_genotypes:
@@ -423,7 +424,7 @@ class Variant(object):
 
                     fits = sample.repeat_indel_fits_dict
 
-                    for frequencies in self.expected_allele_frequencies.values():
+                    for frequencies in eaf.values():
 
                         frequency_adjustment_values = dict()
 
@@ -466,14 +467,14 @@ class Variant(object):
                         for allele, adj in frequency_adjustment_values.items():
                             frequencies[allele] += adj
 
-                for frequencies in self.expected_allele_frequencies.values():
+                for frequencies in eaf.values():
                     for allele, frequency in frequencies.items():
                         frequencies[allele] = max(frequency, 2.0 / total_sample_counts)
 
                 min_log_ratio_sum = float('inf')
                 max_shared_count = 0
 
-                for key, ef in self.expected_allele_frequencies.items():
+                for key, ef in eaf.items():
                     genotype, subclonal = key
                     log_ratio_sum = 0
                     shared_count = 0
@@ -565,10 +566,10 @@ class Variant(object):
 
             subclonal = self.sample_subclonal_alleles[sample]
             genotype = self.sample_genotypes[sample]
-            eaf = self.expected_allele_frequencies[sample]
             allele_counts = self.strand_allele_counts[sample]
 
-            if subclonal:
+            if genotype and subclonal:
+                eaf = self.expected_allele_frequencies[sample]
                 subclonal_allele = subclonal[1]
 
                 f = max(allele_counts[subclonal_allele]['forward'], 1)
