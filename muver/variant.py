@@ -544,7 +544,7 @@ class Variant(object):
                 if f == 0 or r == 0:
                     log_normal_p_value = 0.0
                 else:
-                    log_ratio = abs(math.log(float(f) / r))
+                    log_ratio = -abs(math.log(float(f) / r))
                     log_normal_p_value = 2 * 0.5 * \
                         (1 + math.erf(log_ratio / (math.sqrt(2) * strand_bias_stdev)))
 
