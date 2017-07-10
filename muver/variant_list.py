@@ -254,6 +254,7 @@ class VariantList(object):
                 '{} Subclonal Genotype'.format(sample.sample_name),
                 '{} Subclonal Frequency'.format(sample.sample_name),
                 '{} Genotyping Score'.format(sample.sample_name),
+                '{} Subclonal Valid Flag'.format(sample.sample_name),
                 '{} Mutations'.format(sample.sample_name),
                 '{} LoH Flag'.format(sample.sample_name),
             ])
@@ -306,6 +307,7 @@ class VariantList(object):
                         v.sample_subclonals[sample]['genotype'],
                         v.sample_subclonals[sample]['frequency'],
                         v.sample_genotype_min_log_ratio_sum[sample],
+                        v.sample_subclonal_valid_flag[sample],
                         sample_mutations,
                         sample_called_loh,
                     ]
@@ -335,6 +337,7 @@ class VariantList(object):
             write_vcf_info('FORMAT', 'GT', '1', 'String', 'Genotype', OUTPUT)
             write_vcf_info('FORMAT', 'SGT', '1', 'String', 'Subclonal genotype', OUTPUT)
             write_vcf_info('FORMAT', 'SF', '1', 'Float', 'Subclonal frequency', OUTPUT)
+            write_vcf_info('FORMAT', 'SV', '0', 'Flag', 'Subclonal valid flag', OUTPUT)
             write_vcf_info('FORMAT', 'SIG', '0', 'Flag', 'Significance flag', OUTPUT)
             write_vcf_info('FORMAT', 'MT', '.', 'String', 'Called mutations', OUTPUT)
             write_vcf_info('FORMAT', 'PAC', '.', 'String', 'Called PAC flags', OUTPUT)
@@ -373,7 +376,7 @@ class VariantList(object):
                 alleles = [variant.ref_allele] + alt_alleles
 
                 format_fields = [
-                    'SAC', 'ACF', 'DF', 'PD', 'GT', 'SGT', 'SF', 'SIG', 'MT', 'PAC'
+                    'SAC', 'ACF', 'DF', 'PD', 'GT', 'SGT', 'SF', 'SV', 'SIG', 'MT', 'PAC'
                 ]
 
                 variant_fields = [
@@ -409,6 +412,8 @@ class VariantList(object):
                         variant.sample_subclonals[sample]['genotype'], alleles, ploidy))
                     sample_fields.append(format_vcf_field(
                         variant.sample_subclonals[sample]['frequency']))
+                    sample_fields.append(format_vcf_field(
+                        variant.sample_subclonal_valid_flag[sample]))
 
                     if sample in variant.sample_called_mutations and \
                             sample in variant.sample_called_loh:
