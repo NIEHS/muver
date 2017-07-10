@@ -122,9 +122,8 @@ class VariantList(object):
         self.repeats_fn = repeats_fn
 
         genome_size = sum(chrom_sizes.values())
-        self.p_threshold = \
-            (math.log(1.0 - ((1.0 - 0.01) ** (1.0 / genome_size))) /
-                math.log(10)) ** 2
+        self.p_threshold = 1.0 - ((1.0 - 0.01) ** (1.0 / genome_size))
+
         self.depth_threshold = depth_threshold
 
         if self.excluded_regions_fn:

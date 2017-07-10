@@ -225,6 +225,8 @@ class Variant(object):
         binom = self.binomial_p_values
         chi = self.chisquare_p_values
 
+        log_p = -math.log10(p_threshold)
+
         for sample in [s for s in self.samples if s != self.control_sample]:
 
             significance_flag = False
@@ -237,11 +239,13 @@ class Variant(object):
                     sys.float_info.epsilon)
                 _chi = max(chi[sample], sys.float_info.epsilon)
 
-                comp = (math.log(_binom_forward)/math.log(10)) ** 2 + \
-                    (math.log(_binom_reverse)/math.log(10)) ** 2 + \
-                    (math.log(_chi)/math.log(10)) ** 2
+                comp = math.sqrt(
+                    (-math.log10(_binom_forward)) ** 2 +
+                    (-math.log10(_binom_reverse)) ** 2 +
+                    (-math.log10(_chi)) ** 2
+                )
                 if (
-                    comp > p_threshold and
+                    comp >= log_p and
                     _binom_forward < 0.1 and
                     _binom_reverse < 0.1 and
                     _chi < 0.1
