@@ -155,6 +155,7 @@ class VariantList(object):
             variant.subclonal_strand_bias_binomial_test()
             variant.call_mutations()
             variant.set_report_mutations_flag(self.p_threshold)
+            variant.check_subclonal_validity(self.p_threshold)
 
     def __iter__(self):
         return iter(self.variants)

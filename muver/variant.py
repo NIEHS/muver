@@ -1065,3 +1065,26 @@ class Variant(object):
                 self.sample_significance_flags[sample],
             ])
 
+    def check_subclonal_validity(self, p_threshold):
+        '''
+        Check object attributes to see if a subclonal call is valid.
+
+        To be valid, the following must be true:
+
+        - Not within excluded regions.
+        - Not in a filtered region.
+        - More than one allele/strand pair displays read coverage.
+        - The subclonal strand bias log-normal p-value is not less than
+            threshold.
+        - The subclonal depth binomial test is less than threshold.
+        '''
+        self.sample_subclonal_valid_flag = dict()
+
+        for sample in self.sample_subclonals:
+            self.sample_subclonal_valid_flag[sample] = all([
+                not self.excluded_flag,
+                not self.filtered_sites_flags[sample],
+                self.allele_coverage_flags[sample],
+                self.sample_subclonal_bias_log_normal[sample] >= p_threshold,
+                self.sample_subclonal_binomial[sample] < p_threshold,
+            ])
