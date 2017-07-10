@@ -125,7 +125,7 @@ class Variant(object):
 
     def check_allele_coverage(self):
         '''
-        For each sample, flag if more than one allele has coverage.
+        For each sample, flag if more than one allele/strand pair has coverage.
         '''
         self.allele_coverage_flags = dict()
         sac = self.strand_allele_counts
