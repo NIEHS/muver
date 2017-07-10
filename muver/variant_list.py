@@ -239,6 +239,7 @@ class VariantList(object):
             '{} Subclonal Genotype'.format(self.control_sample.sample_name),
             '{} Subclonal Frequency'.format(self.control_sample.sample_name),
             '{} Genotyping Score'.format(self.control_sample.sample_name),
+            '{} Subclonal Valid Flag'.format(self.control_sample.sample_name),
         ]
 
         for sample in [s for s in self.samples if s != self.control_sample]:
@@ -283,6 +284,7 @@ class VariantList(object):
                     v.sample_subclonals[self.control_sample]['genotype'],
                     v.sample_subclonals[self.control_sample]['frequency'],
                     v.sample_genotype_min_log_ratio_sum[self.control_sample],
+                    v.sample_subclonal_valid_flag[self.control_sample],
                 ]
 
                 for sample in [s for s in self.samples if s != self.control_sample]:
