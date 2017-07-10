@@ -1,4 +1,5 @@
 import math
+import numpy
 
 from variant import Variant
 from utils import read_excluded_regions, read_repeats, read_filtered_sites
@@ -27,7 +28,7 @@ def format_value(obj):
         return str(int(obj))
     elif type(obj) == list or type(obj) == tuple:
         return ','.join([str(x) for x in obj])
-    elif type(obj) == int or type(obj) == float:
+    elif type(obj) == int or type(obj) == float or type(obj) == numpy.float64:
         return str(obj)
     elif type(obj) == str:
         return obj
