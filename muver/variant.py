@@ -226,10 +226,12 @@ class Variant(object):
         chi = self.chisquare_p_values
 
         log_p = -math.log10(p_threshold)
+        composite_p_values = []
 
         for sample in [s for s in self.samples if s != self.control_sample]:
 
             significance_flag = False
+            _chi = max(chi[sample], sys.float_info.epsilon)
 
             for allele in self.alleles:
 
@@ -237,7 +239,6 @@ class Variant(object):
                     sys.float_info.epsilon)
                 _binom_reverse = max(binom[sample][allele]['reverse'],
                     sys.float_info.epsilon)
-                _chi = max(chi[sample], sys.float_info.epsilon)
 
                 comp = math.sqrt(
                     (-math.log10(_binom_forward)) ** 2 +
@@ -252,7 +253,9 @@ class Variant(object):
                 ):
                     significance_flag = True
 
-            self.sample_composite_p_values[sample] = comp
+                composite_p_values.append(comp)
+
+            self.sample_composite_p_values[sample] = max(composite_p_values)
             self.sample_significance_flags[sample] = significance_flag
 
     def assign_ploidy(self):
