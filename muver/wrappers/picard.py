@@ -64,6 +64,7 @@ def fix_mate_information(in_bam, out_bam):
     quiet_call([
         'java', '-Xmx2g', '-jar',
         PATHS['picard'],
+        'FixMateInformation',
         'VALIDATION_STRINGENCY=SILENT',
         'SO=coordinate',
         'I=' + in_bam,
