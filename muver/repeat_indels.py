@@ -1,6 +1,7 @@
 from collections import defaultdict
 import csv
 import matplotlib.pyplot as plt
+import math
 import re
 from scipy.optimize import curve_fit
 
