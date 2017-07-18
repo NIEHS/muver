@@ -111,6 +111,12 @@ def analyze_depth_distribution(args):
         intermediate_files['strand_bias_distribution'],
     )
 
+    samtools.get_mpileup_depths(
+        intermediate_files['merged_bam'],
+        reference_assembly,
+        intermediate_files['depth_bedgraph'],
+    )
+
     mu, sigma = depth_dist.calculate_depth_distribution_mpileup(
         intermediate_files['_mpileup_out'],
         intermediate_files['depth_distribution'],

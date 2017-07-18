@@ -31,6 +31,7 @@ class Sample(object):
             'repeat_indel_fits',
             'repeat_indel_fits_dict',
             'merged_bam',
+            'depth_bedgraph'
             '_mpileup_out',
         ):
             setattr(self, attr, None)
@@ -133,6 +134,7 @@ class Sample(object):
 
             for attr, file_dir, file_name in (
                 ('merged_bam', 'bams', '{}.bam'),
+                ('depth_bedgraph', 'depth_distributions', '{}.bedGraph'),
                 ('filtered_sites', 'filtered_sites',
                     '{}.filtered_sites.txt'),
                 ('strand_bias_distribution', 'depth_distributions',
