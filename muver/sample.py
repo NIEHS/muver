@@ -268,6 +268,7 @@ def write_sample_info_file(samples, output_file):
         'Depth Distribution',
         'Strand Bias Distribution',
         'Merged Bam',
+        'Repeat Indel Fits',
     )
 
     for sample in samples:
