@@ -56,8 +56,11 @@ def write_corrected_bedgraph(input_bedgraph, chrom_sizes_fn, output_bedgraph,
 
                 corr = float(coverage) / (
                     scalar * (
-                        math.erf((mean_log - math.log(relative_pos)) /
-                        (math.sqrt(2) * sd_log))
+                        0.5
+                        + 0.5 * math.erf(
+                            (mean_log - math.log(relative_pos))
+                            / (math.sqrt(2) * sd_log)
+                        )
                     ) + y_int + (slope * relative_pos)
                 )
                 value = int(math.floor(corr))
