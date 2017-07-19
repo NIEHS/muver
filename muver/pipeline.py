@@ -225,12 +225,12 @@ def run_pipeline(reference_assembly, fastq_list, control_sample,
     text_output = os.path.join(
         experiment_directory,
         'output',
-        'variants.txt'
+        'mutants.txt'
     )
     vcf_output = os.path.join(
         experiment_directory,
         'output',
-        'variants.vcf'
+        'mutants.vcf'
     )
     variants.write_output_table(text_output)
     variants.write_output_vcf(vcf_output)

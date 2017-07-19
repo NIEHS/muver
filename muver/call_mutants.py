@@ -35,8 +35,8 @@ def call_mutants(reference_assembly, control_sample, sample_list, input_vcf,
         input_vcf, samples, excluded_regions, repeat_file,
         control_sample, chrom_sizes)
 
-    text_output = '{}.variants.txt'.format(output_header)
-    vcf_output = '{}.variants.vcf'.format(output_header)
+    text_output = '{}.mutants.txt'.format(output_header)
+    vcf_output = '{}.mutants.vcf'.format(output_header)
 
     variants.write_output_table(text_output)
     variants.write_output_vcf(vcf_output)
