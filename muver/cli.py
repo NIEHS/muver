@@ -10,6 +10,7 @@ from call_mutations import call_mutations as _call_mutations
 from depth_correction import write_corrected_bedgraph
 from depth_distribution import (calculate_depth_distribution_bedgraph,
                                 filter_regions_by_depth_bedgraph)
+from depth_ratios import calculate_depth_ratios as _calculate_depth_ratios
 from pipeline import run_pipeline as _run_pipeline
 from reference import read_chrom_sizes_from_file
 from repeat_indels import fit_repeat_indel_rates as _fit_repeat_indel_rates
@@ -93,6 +94,25 @@ def call_mutations(reference_assembly, control_sample_name, sample_list,
         output_header,
         chrom_sizes=chrom_sizes,
         excluded_regions=excluded_regions,
+    )
+
+@main.command()
+@click.option('--mean', default=None, type=float,
+              help='Manually specify the mean.')
+@click.argument('bedgraph_file', type=click.Path(exists=True))
+@click.argument('reference_assembly', type=click.Path(exists=True))
+@click.argument('output_file', type=str)
+def calculate_depth_ratios(bedgraph_file, reference_assembly, output_file,
+                           mean):
+    '''
+    Considering distance from chromosome ends, find the median ratio of depth
+    to the average over 500-bp bins.
+    '''
+    _calculate_depth_ratios(
+        bedgraph_file,
+        reference_assembly,
+        output_file,
+        mean=mean,
     )
 
 @main.command()
