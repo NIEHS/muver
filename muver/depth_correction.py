@@ -40,8 +40,7 @@ def write_corrected_bedgraph(input_bedgraph, chrom_sizes_fn, output_bedgraph,
     last_pos = None
     last_val = None
     last_chr = None
-    start = None
-    end = None
+    last_start = None
 
     with open(input_bedgraph) as f, open(output_bedgraph, 'w') as OUT:
         for line in f:
@@ -61,18 +60,27 @@ def write_corrected_bedgraph(input_bedgraph, chrom_sizes_fn, output_bedgraph,
                         (math.sqrt(2) * sd_log))
                     ) + y_int + (slope * relative_pos)
                 )
-                value = int(round(corr, 0))
+                value = int(math.floor(corr))
 
-                if chromosome == last_chr and coverage == last_val and \
-                        position == last_pos + 1:
-                    end = position
+                if not last_chr and not last_val and not last_pos and \
+                        not last_start:
+
+                    last_pos = position
+                    last_val = value
+                    last_chr = chromosome
+                    last_start = position
+
                 else:
-                    print_line(last_chr, start, end, last_val, OUT)
-                    start = position
-                    end = position
 
-                last_pos = position
-                last_val = value
-                last_chr = chromosome
+                    if chromosome != last_chr or value != last_val or \
+                            position != last_pos + 1:
 
-        print_line(last_chr, start, end, last_val, OUT)
+                        print_line(
+                            last_chr, last_start, last_pos, last_val, OUT)
+                        last_start = position
+
+                    last_pos = position
+                    last_val = value
+                    last_chr = chromosome
+
+        print_line(last_chr, last_start, last_pos, last_val, OUT)
