@@ -6,7 +6,7 @@ import click
 
 from allelic_fraction import get_allelic_fractions
 from bias_distribution import calculate_bias_distribution_bam
-from call_mutants import call_mutants as _call_mutants
+from call_mutations import call_mutations as _call_mutations
 from depth_correction import write_corrected_bedgraph
 from depth_distribution import (calculate_depth_distribution_bedgraph,
                                 filter_regions_by_depth_bedgraph)
@@ -67,10 +67,10 @@ def run_pipeline(reference_assembly, fastq_list, control_sample_name,
 @click.argument('sample_list', type=click.Path(exists=True))
 @click.argument('input_vcf', type=click.Path(exists=True))
 @click.argument('output_header', type=str)
-def call_mutants(reference_assembly, control_sample_name, sample_list,
+def call_mutations(reference_assembly, control_sample_name, sample_list,
                   input_vcf, output_header, chrom_sizes, excluded_regions):
     '''
-    Call mutants from a HaplotypeCaller VCF file.
+    Call mutations from a HaplotypeCaller VCF file.
 
     Parameters for each sample are specified in the SAMPLE_LIST, a TXT file in
     tab-delimited format. For file specification, see tool documentation.
@@ -85,7 +85,7 @@ def call_mutants(reference_assembly, control_sample_name, sample_list,
     "Filtered Sites"
     "Repeat Indel Fits"
     '''
-    _call_mutants(
+    _call_mutations(
         reference_assembly,
         control_sample_name,
         sample_list,
