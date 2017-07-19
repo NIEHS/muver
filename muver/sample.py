@@ -104,7 +104,8 @@ class Sample(object):
 
         def named_file(file_dir, file_name):
             file_name = file_name.format(self.sample_name)
-            return os.path.join(*(self.exp_dir, file_dir, file_name))
+            return os.path.join(*(
+                os.getcwd(), self.exp_dir, file_dir, file_name))
 
         if self.fastqs:
             n = range(len(self.fastqs))
