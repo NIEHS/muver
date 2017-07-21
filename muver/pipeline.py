@@ -141,8 +141,8 @@ def run_pipeline(reference_assembly, fastq_list, control_sample,
     to the experiment directory.
     '''
     if not reference.check_reference_indices(reference_assembly):
-        sys.stderr.write('Reference assembly not indexed. Run "muver '
-            'index_reference".\n')
+        sys.stderr.write('Reference assembly not indexed. Run '
+            '"muver index_reference".\n')
         exit()
 
     pool = Pool(p)

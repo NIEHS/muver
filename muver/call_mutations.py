@@ -16,8 +16,8 @@ def call_mutations(reference_assembly, control_sample, sample_list, input_vcf,
     excluded_regions -- Regions to exclude from variant calling (BED format).
     '''
     if not reference.check_reference_indices(reference_assembly):
-        sys.stderr.write('Reference assembly not indexed. Run "muver '
-            'index_reference".\n')
+        sys.stderr.write('Reference assembly not indexed. Run '
+            '"muver index_reference".\n')
         exit()
 
     samples = sample.read_samples_from_text(sample_list)
