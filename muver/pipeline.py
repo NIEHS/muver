@@ -139,6 +139,11 @@ def run_pipeline(reference_assembly, fastq_list, control_sample,
     Run the MuVer pipeline considering input FASTQ files.  All files written
     to the experiment directory.
     '''
+    if not reference.check_reference_indices(reference_assembly):
+        sys.stderr.write('Reference assembly not indexed. Run "muver '
+            'index_reference".\n')
+        exit()
+
     pool = Pool(p)
 
     generate_experiment_directory(experiment_directory)

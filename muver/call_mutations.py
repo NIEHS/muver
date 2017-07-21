@@ -1,4 +1,5 @@
 import os
+import sys
 
 import reference
 import sample
@@ -14,6 +15,11 @@ def call_mutations(reference_assembly, control_sample, sample_list, input_vcf,
     chrom_sizes -- If specified, chromosome sizes are taken from here.
     excluded_regions -- Regions to exclude from variant calling (BED format).
     '''
+    if not reference.check_reference_indices(reference_assembly):
+        sys.stderr.write('Reference assembly not indexed. Run "muver '
+            'index_reference".\n')
+        exit()
+
     samples = sample.read_samples_from_text(sample_list)
     control_sample = next(
         (x for x in samples if x.sample_name == control_sample),
