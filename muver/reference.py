@@ -3,7 +3,7 @@ from wrappers import bowtie2, picard, samtools
 
 def create_reference_indices(ref_fn):
     '''
-    For a given refere FASTA file, generate several indices.
+    For a given reference FASTA file, generate several indices.
     '''
     bowtie2.build(ref_fn)
     samtools.faidx_index(ref_fn)
