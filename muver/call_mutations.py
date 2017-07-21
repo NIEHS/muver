@@ -15,9 +15,15 @@ def call_mutations(reference_assembly, control_sample, sample_list, input_vcf,
     chrom_sizes -- If specified, chromosome sizes are taken from here.
     excluded_regions -- Regions to exclude from variant calling (BED format).
     '''
+    repeat_file = '{}.repeats'.format(os.path.splitext(reference_assembly)[0])
+
     if not reference.check_reference_indices(reference_assembly):
         sys.stderr.write('Reference assembly not indexed. Run '
             '"muver index_reference".\n')
+        exit()
+    if not os.path.exists(repeat_file):
+        sys.stderr.write('Repeats not found for reference assembly. Run '
+            '"muver create_repeat_file".\n')
         exit()
 
     samples = sample.read_samples_from_text(sample_list)
@@ -25,9 +31,6 @@ def call_mutations(reference_assembly, control_sample, sample_list, input_vcf,
         (x for x in samples if x.sample_name == control_sample),
         None,
     )
-
-    repeat_file = '{}.repeats'.format(
-        os.path.splitext(reference_assembly)[0])
 
     if chrom_sizes:
         chrom_sizes = reference.read_chrom_sizes_from_file(chrom_sizes)

@@ -140,9 +140,15 @@ def run_pipeline(reference_assembly, fastq_list, control_sample,
     Run the MuVer pipeline considering input FASTQ files.  All files written
     to the experiment directory.
     '''
+    repeat_file = '{}.repeats'.format(os.path.splitext(reference_assembly)[0])
+
     if not reference.check_reference_indices(reference_assembly):
         sys.stderr.write('Reference assembly not indexed. Run '
             '"muver index_reference".\n')
+        exit()
+    if not os.path.exists(repeat_file):
+        sys.stderr.write('Repeats not found for reference assembly. Run '
+            '"muver create_repeat_file".\n')
         exit()
 
     pool = Pool(p)
@@ -208,8 +214,7 @@ def run_pipeline(reference_assembly, fastq_list, control_sample,
         samples[index].strand_bias_std = strand_bias_std
 
     # Characterize repeats
-    repeat_file = '{}.repeats'.format(
-        os.path.splitext(reference_assembly)[0])
+
     repeats = read_repeats(repeat_file)
 
     pool.map(characterize_repeat_indel_rates, zip(
