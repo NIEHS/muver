@@ -248,7 +248,7 @@ def calculate_depth_distribution(bedgraph_file, chrom_sizes_file,
 @click.argument('repeats_file', type=click.Path(exists=True))
 @click.argument('output_fits_file', type=str)
 def fit_repeat_indel_rates(bam_file, repeats_file, output_fits_file,
-                                 output_plot_header):
+                           output_plot_header):
     '''
     Fit a logistic function to log-transformed repeat indel rates.
 
