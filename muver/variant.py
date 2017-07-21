@@ -628,109 +628,15 @@ class Variant(object):
 
             self.sample_subclonal_bias_binomial[sample] = binomial_p_value
 
-    def get_all_possible_mutation_transitions(self):
-        '''
-        Given the observed alleles, create a list of all possible mutations.
-        '''
-        mutations = []
-
-        for allele_1 in self.alleles:
-
-            start = self.position
-            end = self.position + len(allele_1) - 1
-
-            if end > start:
-                position = '{}_{}'.format(
-                    str(start),
-                    str(end),
-                )
-            else:
-                position = str(start)
-
-            #  Gain of an allele
-            mutations.append({
-                'name': 'g.' + position + 'gain' + allele_1,
-                'start_allele': None,
-                'end_allele': allele_1,
-                'transitions': {allele_1: 1},
-                'type': 'gain',
-            })
-            #  Loss of an allele
-            mutations.append({
-                'name': 'g.' + position + 'loss' + allele_1,
-                'start_allele': allele_1,
-                'end_allele': None,
-                'transitions': {allele_1: -1},
-                'type': 'loss',
-            })
-
-            for allele_2 in [a for a in self.alleles if a != allele_1]:
-
-                start = self.position
-
-                r = self.ref_allele
-                a_1 = allele_1
-                a_2 = allele_2
-
-                while r[0] == a_1[0] and r[0] == a_2[0]:
-                    r = r[1:]
-                    a_1 = a_1[1:]
-                    a_2 = a_2[1:]
-                    start += 1
-
-                    if not r or not a_1 or not a_2:
-                        break
-
-                if r and a_1 and a_2:
-                    while r[-1] == a_1[-1] and r[-1] == a_2[-1]:
-                        r = r[:-1]
-                        a_1 = a_1[:-1]
-                        a_2 = a_2[:-1]
-
-                        if not r or not a_1 or not a_2:
-                            break
-
-                if r == '':
-                    start -= 1
-                    end = start + 1
-                else:
-                    end = start + len(r) - 1
-
-                if end > start:
-                    position = '{}_{}'.format(
-                        str(start),
-                        str(end),
-                    )
-                else:
-                    position = str(start)
-
-                if a_1 == '':
-                    name = position + 'ins' + a_2
-                elif a_2 == '':
-                    name = position + 'del' + a_1
-                else:
-                    name = position + a_1 + '>' + a_2
-
-                #  Allele 'conversion': one allele to another
-                mutations.append({
-                    'name': 'g.' + name,
-                    'transitions': {allele_1: -1, allele_2: 1},
-                    'start_allele': allele_1,
-                    'end_allele': allele_2,
-                    'type': 'conversion',
-                })
-
-        return mutations
-
-    def get_conversion_name(self, mutation):
+    def get_conversion_name(self, allele_1, allele_2):
         '''
         For conversions (transition from one allele to another), return a name.
         '''
         start = self.position
         r = self.ref_allele
 
-        a_1 = mutation['start_allele']
-        a_2 = mutation['end_allele']
+        a_1 = allele_1
+        a_2 = allele_2
 
         while r[0] == a_1[0] and r[0] == a_2[0]:
             r = r[1:]
@@ -777,37 +683,89 @@ class Variant(object):
         '''
         For allele gain, return a name.
         '''
-        if not gained_allele:
+        if gained_allele:
+            start = self.position
+            end = start + len(gained_allele) - 1
+
+            allele = gained_allele
+        else:
             start = self.position
             end = start + len(self.ref_allele) - 1
 
-            if end > start:
-                position = '{}_{}'.format(
-                    str(start),
-                    str(end),
-                )
-            else:
-                position = str(start)
+            allele = '*'
 
-            return('g.' + position + 'gain*')
+        if end > start:
+            position = '{}_{}'.format(
+                str(start),
+                str(end),
+            )
+        else:
+            position = str(start)
+
+        return('g.' + position + 'gain' + allele)
 
     def get_loss_name(self, lost_allele):
         '''
         For allele loss, return a name.
         '''
+        if lost_allele:
+            start = self.position
+            end = start + len(lost_allele) - 1
+
+            allele = lost_allele
         if not lost_allele:
             start = self.position
             end = start + len(self.ref_allele) - 1
 
-            if end > start:
-                position = '{}_{}'.format(
-                    str(start),
-                    str(end),
-                )
-            else:
-                position = str(start)
+            allele = '*'
 
-            return('g.' + position + 'loss*')
+        if end > start:
+            position = '{}_{}'.format(
+                str(start),
+                str(end),
+            )
+        else:
+            position = str(start)
+
+        return('g.' + position + 'loss' + allele)
+
+    def get_all_possible_mutation_transitions(self):
+        '''
+        Given the observed alleles, create a list of all possible mutations.
+        '''
+        mutations = []
+
+        for allele_1 in self.alleles:
+
+            #  Gain of an allele
+            mutations.append({
+                'name': 'g.' + self.get_gain_name(allele_1),
+                'start_allele': None,
+                'end_allele': allele_1,
+                'transitions': {allele_1: 1},
+                'type': 'gain',
+            })
+            #  Loss of an allele
+            mutations.append({
+                'name': 'g.' + self.get_loss_name(allele_1),
+                'start_allele': allele_1,
+                'end_allele': None,
+                'transitions': {allele_1: -1},
+                'type': 'loss',
+            })
+
+            for allele_2 in [a for a in self.alleles if a != allele_1]:
+                #  Allele 'conversion': one allele to another
+                mutations.append({
+                    'name': 'g.' + self.get_conversion_name(
+                        allele_1, allele_2),
+                    'transitions': {allele_1: -1, allele_2: 1},
+                    'start_allele': allele_1,
+                    'end_allele': allele_2,
+                    'type': 'conversion',
+                })
+
+        return mutations
 
     def call_mutations(self):
         '''
@@ -940,9 +898,7 @@ class Variant(object):
                     for mutation, loh in orphan_gains:
 
                         shared = True
-
                         for path in paths[1:]:
-
                             if not list(j for j, m in enumerate(path['mutations']) if m['type'] == 'gain'):
                                 shared = False
 
@@ -963,9 +919,7 @@ class Variant(object):
                     for mutation, loh in orphan_losses:
 
                         shared = True
-
                         for path in paths[1:]:
-
                             if not list(j for j, m in enumerate(path['mutations']) if m['type'] == 'loss'):
                                 shared = False
 
@@ -987,9 +941,7 @@ class Variant(object):
 
                         start_allele = mutation['start_allele']
                         start_shared = True
-
                         for path in paths[1:]:
-
                             if not list(j for j, m in enumerate(path['mutations']) if m['start_allele'] == start_allele and m['type'] == 'conversion'):
                                 start_shared = False
 
@@ -1018,7 +970,7 @@ class Variant(object):
                             similar_mutations.sort(key=lambda x: x['name'])
 
                             mutation_names = list(
-                                self.get_conversion_name(m) for m in similar_mutations)
+                                self.get_conversion_name(m['start_allele'], m['end_allele']) for m in similar_mutations)
                             mutation_lohs = list(
                                 str(resolve_loh(mutation_loh[frozenset(m)])) for m in similar_mutations)
                             shared_mutations.append({
