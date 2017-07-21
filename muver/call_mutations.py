@@ -7,7 +7,7 @@ import variant_list
 
 
 def call_mutations(reference_assembly, control_sample, sample_list, input_vcf,
-                  output_header, chrom_sizes=None, excluded_regions=None):
+                  output_header, excluded_regions=None):
     '''
     Using a reference assembly, sample list, and VCF file from GATK
     HaplotypeCaller, call mutations.
@@ -32,10 +32,7 @@ def call_mutations(reference_assembly, control_sample, sample_list, input_vcf,
         None,
     )
 
-    if chrom_sizes:
-        chrom_sizes = reference.read_chrom_sizes_from_file(chrom_sizes)
-    else:
-        chrom_sizes = reference.read_chrom_sizes(reference_assembly)
+    chrom_sizes = reference.read_chrom_sizes(reference_assembly)
 
     variants = variant_list.VariantList(
         input_vcf, samples, excluded_regions, repeat_file,

@@ -1,22 +1,9 @@
 import math
 
-
-#  TODO: move to utils
-def read_chrom_sizes(input_file):
-    '''
-    Read chromosome sizes from a UCSC chrom_sizes file into a dict.
-    '''
-    chrom_sizes = dict()
-
-    with open(input_file) as f:
-        for line in f:
-            chromosome, size = line.strip().split()
-            chrom_sizes[chromosome] = int(size)
-
-    return chrom_sizes
+from reference import read_chrom_sizes
 
 
-def write_corrected_bedgraph(input_bedgraph, chrom_sizes_fn, output_bedgraph,
+def write_corrected_bedgraph(input_bedgraph, chrom_sizes, output_bedgraph,
                              y_int, scalar, mean_log, sd_log, slope):
     '''
     Correct values in a depth bedGraph file.
@@ -34,8 +21,6 @@ def write_corrected_bedgraph(input_bedgraph, chrom_sizes_fn, output_bedgraph,
                     str(value),
                 )
             )
-
-    chrom_sizes = read_chrom_sizes(chrom_sizes_fn)
 
     last_pos = None
     last_val = None

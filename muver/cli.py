@@ -12,7 +12,7 @@ from depth_distribution import (calculate_depth_distribution_bedgraph,
                                 filter_regions_by_depth_bedgraph)
 from depth_ratios import calculate_depth_ratios as _calculate_depth_ratios
 from pipeline import run_pipeline as _run_pipeline
-from reference import create_reference_indices, read_chrom_sizes_from_file
+from reference import create_reference_indices, read_chrom_sizes
 from repeat_indels import fit_repeat_indel_rates as _fit_repeat_indel_rates
 from repeats import create_repeat_file as _create_repeat_file
 from utils import read_repeats
@@ -60,7 +60,6 @@ def run_pipeline(reference_assembly, fastq_list, control_sample_name,
     )
 
 @main.command()
-@click.option('--chrom_sizes', default=None)
 @click.option('--excluded_regions', default=None, type=click.Path(exists=True),
               help='Regions to exclude in mutation calling (BED format).')
 @click.argument('reference_assembly', type=click.Path(exists=True))
@@ -69,7 +68,7 @@ def run_pipeline(reference_assembly, fastq_list, control_sample_name,
 @click.argument('input_vcf', type=click.Path(exists=True))
 @click.argument('output_header', type=str)
 def call_mutations(reference_assembly, control_sample_name, sample_list,
-                  input_vcf, output_header, chrom_sizes, excluded_regions):
+                  input_vcf, output_header, excluded_regions):
     '''
     Call mutations from a HaplotypeCaller VCF file.
 
@@ -92,7 +91,6 @@ def call_mutations(reference_assembly, control_sample_name, sample_list,
         sample_list,
         input_vcf,
         output_header,
-        chrom_sizes=chrom_sizes,
         excluded_regions=excluded_regions,
     )
 
@@ -160,10 +158,10 @@ def create_repeat_file(fasta_file, output_repeat_file):
 @click.argument('mean_log', type=float)
 @click.argument('sd_log', type=float)
 @click.argument('slope', type=float)
-@click.argument('chrom_sizes_file', type=click.Path(exists=True))
+@click.argument('reference_assembly', type=click.Path(exists=True))
 @click.argument('input_bedgraph', type=click.Path(exists=True))
 @click.argument('output_bedgraph', type=str)
-def correct_depths(y_int, scalar, mean_log, sd_log, slope, chrom_sizes_file,
+def correct_depths(y_int, scalar, mean_log, sd_log, slope, reference_assembly,
                      input_bedgraph, output_bedgraph):
     '''
     Correct values in a depth bedGraph file.
@@ -171,9 +169,10 @@ def correct_depths(y_int, scalar, mean_log, sd_log, slope, chrom_sizes_file,
     Correction is performed using the sum of a log-normal cumulative
     distribution function and linear function.
     '''
+    chrom_sizes = read_chrom_sizes(reference_assembly)
     write_corrected_bedgraph(
         input_bedgraph,
-        chrom_sizes_file,
+        chrom_sizes,
         output_bedgraph,
         y_int,
         scalar,
@@ -218,9 +217,9 @@ def calculate_bias_distribution(bam_file, reference_assembly,
               help='If OUTPUT_FILTERED_REGIONS is specified, positions to be '
               'filtered based on abnormal depth will be written to this file.')
 @click.argument('bedgraph_file', type=click.Path(exists=True))
-@click.argument('chrom_sizes_file', type=click.Path(exists=True))
+@click.argument('reference_assembly', type=click.Path(exists=True))
 @click.argument('output_depth_distribution', type=str)
-def calculate_depth_distribution(bedgraph_file, chrom_sizes_file,
+def calculate_depth_distribution(bedgraph_file, reference_assembly,
                                  output_depth_distribution,
                                  output_filtered_regions):
     '''
@@ -230,7 +229,7 @@ def calculate_depth_distribution(bedgraph_file, chrom_sizes_file,
         bedgraph_file,
         output_depth_distribution,
     )
-    chrom_sizes = read_chrom_sizes_from_file(chrom_sizes_file)
+    chrom_sizes = read_chrom_sizes(reference_assembly)
     if output_filtered_regions:
         filter_regions_by_depth_bedgraph(
             bedgraph_file,

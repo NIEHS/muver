@@ -58,17 +58,3 @@ def read_chrom_sizes(reference_assembly_fn):
                     chrom_sizes[last_chromosome] += len(line.strip())
 
     return chrom_sizes
-
-
-def read_chrom_sizes_from_file(chrom_sizes_fn):
-    '''
-    Read chromosome sizes from a UCSC chrom_sizes file.
-    '''
-    chrom_sizes = dict()
-
-    with open(chrom_sizes_fn) as f:
-        for line in f:
-            chromosome, size = line.strip().split()
-            chrom_sizes[chromosome] = int(size)
-
-    return chrom_sizes
