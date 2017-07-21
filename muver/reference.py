@@ -1,3 +1,5 @@
+import os
+
 from wrappers import bowtie2, picard, samtools
 
 
@@ -12,23 +14,25 @@ def create_reference_indices(ref_fn):
 
 def read_chrom_sizes(reference_assembly_fn):
     '''
-    Iterate through a FASTA file to find the length of each chromosome.
+    Iterate through a FASTA file to find the length of each chromosome. If a
+    FAIDX index is available, it will read the lengths from there.
     '''
     chrom_sizes = dict()
-    last_chromosome = None
 
-    with open(reference_assembly_fn) as f:
-
-        for line in f:
-
-            if line.startswith('>'):
-
-                last_chromosome = line.split('>')[1].strip()
-                chrom_sizes[last_chromosome] = 0
-
-            else:
-
-                chrom_sizes[last_chromosome] += len(line.strip())
+    if os.path.exists(reference_assembly_fn + '.fai'):
+        with open(reference_assembly_fn + '.fai') as f:
+            for line in f:
+                chromosome, size = line.strip().split('\t')[:2]
+                chrom_sizes[chromosome] = int(size)
+    else:
+        last_chromosome = None
+        with open(reference_assembly_fn) as f:
+            for line in f:
+                if line.startswith('>'):
+                    last_chromosome = line.split('>')[1].strip()
+                    chrom_sizes[last_chromosome] = 0
+                else:
+                    chrom_sizes[last_chromosome] += len(line.strip())
 
     return chrom_sizes
 
