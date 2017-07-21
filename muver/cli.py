@@ -12,7 +12,7 @@ from depth_distribution import (calculate_depth_distribution_bedgraph,
                                 filter_regions_by_depth_bedgraph)
 from depth_ratios import calculate_depth_ratios as _calculate_depth_ratios
 from pipeline import run_pipeline as _run_pipeline
-from reference import read_chrom_sizes_from_file
+from reference import create_reference_indices, read_chrom_sizes_from_file
 from repeat_indels import fit_repeat_indel_rates as _fit_repeat_indel_rates
 from repeats import create_repeat_file as _create_repeat_file
 from utils import read_repeats
@@ -94,6 +94,16 @@ def call_mutations(reference_assembly, control_sample_name, sample_list,
         output_header,
         chrom_sizes=chrom_sizes,
         excluded_regions=excluded_regions,
+    )
+
+@main.command()
+@click.argument('reference_assembly', type=click.Path(exists=True))
+def index_reference(reference_assembly):
+    '''
+    Index the reference using Bowtie2, picard, and samtools.
+    '''
+    create_reference_indices(
+        reference_assembly,
     )
 
 @main.command()
