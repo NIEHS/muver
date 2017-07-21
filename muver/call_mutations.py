@@ -28,8 +28,6 @@ def call_mutations(reference_assembly, control_sample, sample_list, input_vcf,
 
     repeat_file = '{}.repeats'.format(
         os.path.splitext(reference_assembly)[0])
-    if not os.path.exists(repeat_file):
-        create_repeat_file(reference_assembly, repeat_file)
 
     if chrom_sizes:
         chrom_sizes = reference.read_chrom_sizes_from_file(chrom_sizes)

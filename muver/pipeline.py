@@ -209,8 +209,6 @@ def run_pipeline(reference_assembly, fastq_list, control_sample,
     # Characterize repeats
     repeat_file = '{}.repeats'.format(
         os.path.splitext(reference_assembly)[0])
-    if not os.path.exists(repeat_file):
-        create_repeat_file(reference_assembly, repeat_file)
     repeats = read_repeats(repeat_file)
 
     pool.map(characterize_repeat_indel_rates, zip(
