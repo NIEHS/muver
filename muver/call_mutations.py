@@ -20,7 +20,6 @@ def call_mutations(reference_assembly, control_sample, sample_list, input_vcf,
         None,
     )
 
-    reference.create_reference_indices(reference_assembly)
     repeat_file = '{}.repeats'.format(
         os.path.splitext(reference_assembly)[0])
     if not os.path.exists(repeat_file):

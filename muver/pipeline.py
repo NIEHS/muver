@@ -152,8 +152,6 @@ def run_pipeline(reference_assembly, fastq_list, control_sample,
     for sample in samples:
         sample.generate_intermediate_files()
 
-    reference.create_reference_indices(reference_assembly)
-
     # Align
     for sample in samples:
         for i, fastqs in enumerate(sample.fastqs):
