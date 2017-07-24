@@ -63,6 +63,35 @@ def get_possible_genotypes(ploidy, alleles):
     return possible_genotypes
 
 
+def loh_comparison(loh_1, loh_2):
+    '''
+    Compare two LOH values. Considers ternary logic.
+    '''
+    lohs = [loh_1, loh_2]
+    if None in lohs:
+        return None
+    elif True in lohs and False in lohs:
+        return None
+    elif lohs == [True, True]:
+        return True
+    elif lohs == [False, False]:
+        return False
+    else:
+        raise ValueError('LOH comparison failed.')
+
+
+def resolve_loh(loh):
+    '''
+    Return an LOH value in integer notation.
+    '''
+    if loh is None:
+        return -1
+    elif loh is True:
+        return 1
+    elif loh is False:
+        return 0
+
+
 class Variant(object):
     '''
     Class for MuVer variants.
@@ -628,106 +657,64 @@ class Variant(object):
 
             self.sample_subclonal_bias_binomial[sample] = binomial_p_value
 
-    def get_conversion_name(self, allele_1, allele_2):
+    def get_mutation_name(self, start_allele, end_allele, **kwargs):
         '''
-        For conversions (transition from one allele to another), return a name.
+        Get the name for a mutation given the start allele and end allele.
         '''
-        start = self.position
-        r = self.ref_allele
+        # Allele gain (CNV)
+        if start_allele and not end_allele:
+            if kwargs['ambiguous']:
+                return 'g.{}gain{}'.format(str(self.position), '*')
+            else:
+                return 'g.{}gain{}'.format(str(self.position), end_allele)
+        # Allele loss (CNV)
+        elif end_allele and not start_allele:
+            if kwargs['ambiguous']:
+                return 'g.{}loss{}'.format(str(self.position), '*')
+            else:
+                return 'g.{}loss{}'.format(str(self.position), start_allele)
+        # Allele conversion
+        else:
+            start = self.position
+            r = self.ref_allele
+            a_1 = start_allele
+            a_2 = end_allele
 
-        a_1 = allele_1
-        a_2 = allele_2
-
-        while r[0] == a_1[0] and r[0] == a_2[0]:
-            r = r[1:]
-            a_1 = a_1[1:]
-            a_2 = a_2[1:]
-            start += 1
-
-            if not r or not a_1 or not a_2:
-                break
-
-        if r and a_1 and a_2:
-            while r[-1] == a_1[-1] and r[-1] == a_2[-1]:
-                r = r[:-1]
-                a_1 = a_1[:-1]
-                a_2 = a_2[:-1]
-
+            while r[0] == a_1[0] and r[0] == a_2[0]:
+                r = r[1:]
+                a_1 = a_1[1:]
+                a_2 = a_2[1:]
+                start += 1
                 if not r or not a_1 or not a_2:
                     break
 
-        if r == '':
-            start -= 1
-            end = start + 1
-        else:
-            end = start + len(r) - 1
+            if r and a_1 and a_2:
+                while r[-1] == a_1[-1] and r[-1] == a_2[-1]:
+                    r = r[:-1]
+                    a_1 = a_1[:-1]
+                    a_2 = a_2[:-1]
+                    if not r or not a_1 or not a_2:
+                        break
 
-        if end > start:
-            position = '{}_{}'.format(
-                str(start),
-                str(end),
-            )
-        else:
-            position = str(start)
+            if r == '':
+                start -= 1
+                end = start + 1
+            else:
+                end = start + len(r) - 1
 
-        if a_1 == '':
-            name = position + 'ins' + a_2
-        elif a_2 == '':
-            name = position + 'del' + a_1
-        else:
-            name = position + a_1 + '>' + a_2
+            if end > start:
+                position = '{}_{}'.format(str(start), str(end))
+            else:
+                position = str(start)
 
-        return name
+            if a_1 == '':
+                event = 'ins' + a_2
+            elif a_2 == '':
+                event = 'del' + a_1
+            else:
+                event = a_1 + '>' + a_2
 
-    def get_gain_name(self, gained_allele):
-        '''
-        For allele gain, return a name.
-        '''
-        if gained_allele:
-            start = self.position
-            end = start + len(gained_allele) - 1
-
-            allele = gained_allele
-        else:
-            start = self.position
-            end = start + len(self.ref_allele) - 1
-
-            allele = '*'
-
-        if end > start:
-            position = '{}_{}'.format(
-                str(start),
-                str(end),
-            )
-        else:
-            position = str(start)
-
-        return('g.' + position + 'gain' + allele)
-
-    def get_loss_name(self, lost_allele):
-        '''
-        For allele loss, return a name.
-        '''
-        if lost_allele:
-            start = self.position
-            end = start + len(lost_allele) - 1
-
-            allele = lost_allele
-        if not lost_allele:
-            start = self.position
-            end = start + len(self.ref_allele) - 1
-
-            allele = '*'
-
-        if end > start:
-            position = '{}_{}'.format(
-                str(start),
-                str(end),
-            )
-        else:
-            position = str(start)
-
-        return('g.' + position + 'loss' + allele)
+            return 'g.{}{}'.format(position, event)
 
     def get_all_possible_mutation_transitions(self):
         '''
@@ -739,7 +726,8 @@ class Variant(object):
 
             #  Gain of an allele
             mutations.append({
-                'name': 'g.' + self.get_gain_name(allele_1),
+                'name': self.get_mutation_name(
+                    None, allele_1, ambiguous=False),
                 'start_allele': None,
                 'end_allele': allele_1,
                 'transitions': {allele_1: 1},
@@ -747,18 +735,19 @@ class Variant(object):
             })
             #  Loss of an allele
             mutations.append({
-                'name': 'g.' + self.get_loss_name(allele_1),
+                'name': self.get_mutation_name(
+                    allele_1, None, ambiguous=False),
                 'start_allele': allele_1,
                 'end_allele': None,
                 'transitions': {allele_1: -1},
                 'type': 'loss',
             })
 
+            #  Allele 'conversion': one allele to another
             for allele_2 in [a for a in self.alleles if a != allele_1]:
-                #  Allele 'conversion': one allele to another
                 mutations.append({
-                    'name': 'g.' + self.get_conversion_name(
-                        allele_1, allele_2),
+                    'name': self.get_mutation_name(
+                        allele_1, allele_2, ambiguous=False),
                     'transitions': {allele_1: -1, allele_2: 1},
                     'start_allele': allele_1,
                     'end_allele': allele_2,
@@ -767,36 +756,165 @@ class Variant(object):
 
         return mutations
 
+    def get_mutation_paths(self, sample_genotype, control_genotype, mutations):
+        '''
+        For the given sample and control genotypes, describe all valid mutation
+        paths.
+        '''
+        start_allele_counts = \
+            genotype_to_allele_counts(control_genotype, self.alleles)
+        end_allele_counts = \
+            genotype_to_allele_counts(sample_genotype, self.alleles)
+
+        paths = [{
+            'endpoint': start_allele_counts,
+            'mutations': [],
+            'loh': []
+        }]
+
+        while end_allele_counts not in [p['endpoint'] for p in paths]:
+
+            temp_paths = []
+
+            for path in paths:
+                for mutation in mutations:
+
+                    temp_path = copy.deepcopy(path)
+                    valid = True
+
+                    #  Check for gain of allele not present
+                    if mutation['type'] == 'gain':
+                        gained_allele = mutation['transitions'].keys()[0]
+                        if path['endpoint'][gained_allele] < 1:
+                            valid = False
+
+                    #  Determine LOH flag
+                    loh_flag = False
+                    if sum(mutation['transitions'].values()) == 0:
+                        for allele, value in mutation['transitions'].items():
+                            if all([
+                                value == 1,
+                                temp_path['endpoint'][allele] > 0,
+                            ]):
+                                loh_flag = True
+
+                    #  Apply mutation to endpoint
+                    for allele, value in mutation['transitions'].items():
+                        temp_path['endpoint'][allele] += value
+                    temp_path['mutations'].append(mutation)
+                    temp_path['loh'].append(loh_flag)
+
+                    #  Check for negative allele values
+                    for value in temp_path['endpoint'].values():
+                        if value < 0:
+                            valid = False
+
+                    if valid:
+                        temp_paths.append(temp_path)
+
+            paths = copy.deepcopy(temp_paths)
+
+        return [p for p in paths if p['endpoint'] == end_allele_counts]
+
+    @staticmethod
+    def analyze_paths(paths):
+        '''
+        Analyze paths to find shared mutations. Analysis is anchored on the
+        first path. If a mutation in the first path is not shared, it is
+        returned in the orphan list for subsequent analysis.
+        '''
+        shared_mutations = []
+        orphan_mutations = []
+
+        for mutation, loh in zip(paths[0]['mutations'], paths[0]['loh']):
+            shared = True
+            for path in paths[1:]:
+                if mutation not in path['mutations']:
+                    shared = False
+            if shared:
+                for i, path in enumerate(copy.deepcopy(paths)):
+                    if i > 0:
+                        index = next(
+                            (j for j, m in enumerate(path['mutations'])
+                                if m == mutation),
+                            None,
+                        )
+                        loh = loh_comparison(loh, path['loh'][index])
+                        paths[i]['mutations'].pop(index)
+                        paths[i]['loh'].pop(index)
+                shared_mutations.append((mutation, resolve_loh(loh)))
+            else:
+                orphan_mutations.append((mutation, resolve_loh(loh)))
+
+        return shared_mutations, orphan_mutations
+
+    @staticmethod
+    def check_gains(mutation, **kwargs):
+        return mutation['type'] == 'gain'
+
+    @staticmethod
+    def check_losses(mutation, **kwargs):
+        return mutation['type'] == 'loss'
+
+    @staticmethod
+    def check_conversions(mutation, **kwargs):
+        start_allele = kwargs['start_allele']
+        return all([
+            mutation['type'] == 'conversion',
+            mutation['start_allele'] == start_allele,
+        ])
+
+    def resolve_orphan_mutations(self, orphans, paths, comparison_function):
+        shared_mutations = []
+        for mutation, loh in orphans:
+
+            start_allele = mutation['start_allele']
+            start_shared = True
+            for path in paths[1:]:
+                if not list(j for j, m in enumerate(path['mutations']) if comparison_function(m, start_allele=start_allele)):
+                    start_shared = False
+
+            if start_shared:
+
+                similar_mutations = [mutation]
+                mutation_loh = {frozenset(mutation): loh}
+
+                for i, path in enumerate(copy.deepcopy(paths)):
+                    if i > 0:
+
+                        index = next(j for j, m in enumerate(path['mutations']) if comparison_function(m, start_allele=start_allele))
+
+                        similar_mutation = paths[i]['mutations'].pop(index)
+                        similar_loh = loh_comparison(loh, paths[i]['loh'].pop(index))
+
+                        if frozenset(similar_mutation) in mutation_loh:
+                            _loh = mutation_loh[frozenset(similar_mutation)]
+                            mutation_loh[frozenset(similar_mutation)] = \
+                                loh_comparison(similar_loh, _loh)
+                        else:
+                            mutation_loh[frozenset(similar_mutation)] = \
+                                similar_loh
+
+                        if similar_mutation not in similar_mutations:
+                            similar_mutations.append(similar_mutation)
+
+                similar_mutations.sort(key=lambda x: x['name'])
+                mutation_names = list(
+                    self.get_mutation_name(m['start_allele'], m['end_allele'], ambiguous=True) for m in similar_mutations)
+                mutation_lohs = list(
+                    str(resolve_loh(mutation_loh[frozenset(m)])) for m in similar_mutations)
+
+                shared_mutations.append((
+                    {'name': '|'.join(mutation_names), 'type': 'conversion'},
+                    '|'.join(mutation_lohs),
+                ))
+
+        return shared_mutations
+
     def call_mutations(self):
         '''
         For each sample, call mutations.
         '''
-        # LOHs utilize ternary logic.  Here, None means 'ambiguous'.
-        def loh_comparison(loh_1, loh_2):
-
-            lohs = [loh_1, loh_2]
-
-            if None in lohs:
-                return None
-            elif True in lohs and False in lohs:
-                return None
-            elif lohs == [True, True]:
-                return True
-            elif lohs == [False, False]:
-                return False
-            else:
-                raise ValueError('LOH comparison failed.')
-
-        # Convert to integer notation.
-        def resolve_loh(loh):
-
-            if loh is None:
-                return -1
-            elif loh is True:
-                return 1
-            elif loh is False:
-                return 0
-
         self.sample_called_mutations = dict()
         self.sample_called_loh = dict()
 
@@ -804,187 +922,50 @@ class Variant(object):
 
         for sample in [s for s in self.samples if s != self.control_sample]:
 
-            self.sample_called_mutations[sample] = None
-            self.sample_called_loh[sample] = None
+            self.sample_called_mutations[sample] = []
+            self.sample_called_loh[sample] = []
 
+            shared_mutations = self.sample_called_mutations[sample]
+            shared_loh_flags = self.sample_called_loh[sample]
             sample_genotype = self.sample_genotypes[sample]
             control_genotype = self.sample_genotypes[self.control_sample]
 
             if sample_genotype and control_genotype:
-
                 if sample_genotype != control_genotype:
 
-                    start_allele_counts = genotype_to_allele_counts(control_genotype, self.alleles)
-                    end_allele_counts = genotype_to_allele_counts(sample_genotype, self.alleles)
+                    paths = self.get_mutation_paths(
+                        sample_genotype, control_genotype, possible_mutations)
 
-                    paths = [{'endpoint': start_allele_counts, 'mutations': [], 'loh': []}]
-
-                    while end_allele_counts not in [p['endpoint'] for p in paths]:
-
-                        temp_paths = []
-
-                        for path in paths:
-                            for mutation in possible_mutations:
-
-                                temp_path = copy.deepcopy(path)
-                                valid = True
-
-                                #  Check for gain of allele not present
-                                if mutation['type'] == 'gain':
-                                    gained_allele = mutation['transitions'].keys()[0]
-                                    if path['endpoint'][gained_allele] < 1:
-                                        valid = False
-
-                                #  Determine LOH flag
-                                loh_flag = False
-                                if sum(mutation['transitions'].values()) == 0:
-                                    for allele, value in mutation['transitions'].items():
-                                        if value == 1 and temp_path['endpoint'][allele] > 0:
-                                            loh_flag = True
-
-                                #  Apply mutation to endpoint
-                                for allele, value in mutation['transitions'].items():
-                                    temp_path['endpoint'][allele] += value
-                                temp_path['mutations'].append(mutation)
-                                temp_path['loh'].append(loh_flag)
-
-                                #  Check for negative allele values
-                                for value in temp_path['endpoint'].values():
-                                    if value < 0:
-                                        valid = False
-
-                                if valid:
-                                    temp_paths.append(temp_path)
-
-                        paths = copy.deepcopy(temp_paths)
-
-                    paths = [p for p in paths if p['endpoint'] == end_allele_counts]
-
-                    shared_mutations = []
-                    shared_loh_flags = []
-                    not_shared = []
-
-                    for mutation, loh in zip(paths[0]['mutations'], paths[0]['loh']):
-
-                        shared = True
-
-                        for path in paths[1:]:
-                            if mutation not in path['mutations']:
-                                shared = False
-
-                        if shared:
-
-                            for i, path in enumerate(copy.deepcopy(paths)):
-                                if i > 0:
-                                    index = next((j for j, m in enumerate(path['mutations']) if m == mutation), None)
-                                    loh = loh_comparison(loh, path['loh'][index])
-                                    paths[i]['mutations'].pop(index)
-                                    paths[i]['loh'].pop(index)
-
-                            shared_mutations.append(mutation)
-                            shared_loh_flags.append(resolve_loh(loh))
-
-                        else:
-
-                            not_shared.append((mutation, loh))
+                    _shared, orphans = self.analyze_paths(paths)
+                    if _shared:
+                        _mutations, _loh_flags = zip(*_shared)
+                        shared_mutations.extend(_mutations)
+                        shared_loh_flags.extend(_loh_flags)
 
                     orphan_gains = \
-                        (m for m in not_shared if m[0]['type'] == 'gain')
+                        (m for m in orphans if m[0]['type'] == 'gain')
                     orphan_losses = \
-                        (m for m in not_shared if m[0]['type'] == 'loss')
+                        (m for m in orphans if m[0]['type'] == 'loss')
                     orphan_conversions = \
-                        (m for m in not_shared if m[0]['type'] == 'conversion')
+                        (m for m in orphans if m[0]['type'] == 'conversion')
 
-                    for mutation, loh in orphan_gains:
-
-                        shared = True
-                        for path in paths[1:]:
-                            if not list(j for j, m in enumerate(path['mutations']) if m['type'] == 'gain'):
-                                shared = False
-
-                        if shared:
-                            shared_mutations.append({
-                                'name': self.get_gain_name(gained_allele=None),
-                                'type': 'gain',
-                            })
-                            shared_loh_flags.append(str(0))
-
-                        for i, path in enumerate(copy.deepcopy(paths)):
-                            if i > 0:
-
-                                index = next((j for j, m in enumerate(path['mutations']) if m['type'] == 'gain'), None)
-                                loh = loh_comparison(loh, path['loh'].pop(index))
-                                path['mutations'].pop(index)
-
-                    for mutation, loh in orphan_losses:
-
-                        shared = True
-                        for path in paths[1:]:
-                            if not list(j for j, m in enumerate(path['mutations']) if m['type'] == 'loss'):
-                                shared = False
-
-                        if shared:
-                            shared_mutations.append({
-                                'name': self.get_loss_name(lost_allele=None),
-                                'type': 'loss',
-                            })
-                            shared_loh_flags.append(str(0))
-
-                        for i, path in enumerate(copy.deepcopy(paths)):
-                            if i > 0:
-
-                                index = next((j for j, m in enumerate(path['mutations']) if m['type'] == 'loss'), None)
-                                loh = loh_comparison(loh, path['loh'].pop(index))
-                                path['mutations'].pop(index)
-
-                    for mutation, loh in orphan_conversions:
-
-                        start_allele = mutation['start_allele']
-                        start_shared = True
-                        for path in paths[1:]:
-                            if not list(j for j, m in enumerate(path['mutations']) if m['start_allele'] == start_allele and m['type'] == 'conversion'):
-                                start_shared = False
-
-                        if start_shared:
-
-                            similar_mutations = [mutation]
-                            mutation_loh = {frozenset(mutation): loh}
-
-                            for i, path in enumerate(copy.deepcopy(paths)):
-                                if i > 0:
-
-                                    index = next(j for j, m in enumerate(path['mutations']) if m['start_allele'] == start_allele and m['type'] == 'conversion')
-
-                                    similar_mutation = paths[i]['mutations'].pop(index)
-                                    similar_loh = loh_comparison(loh, paths[i]['loh'].pop(index))
-
-                                    if frozenset(similar_mutation) in mutation_loh:
-                                        _loh = mutation_loh[frozenset(similar_mutation)]
-                                        mutation_loh[frozenset(similar_mutation)] = loh_comparison(similar_loh, _loh)
-                                    else:
-                                        mutation_loh[frozenset(similar_mutation)] = similar_loh
-
-                                    if similar_mutation not in similar_mutations:
-                                        similar_mutations.append(similar_mutation)
-
-                            similar_mutations.sort(key=lambda x: x['name'])
-
-                            mutation_names = list(
-                                self.get_conversion_name(m['start_allele'], m['end_allele']) for m in similar_mutations)
-                            mutation_lohs = list(
-                                str(resolve_loh(mutation_loh[frozenset(m)])) for m in similar_mutations)
-                            shared_mutations.append({
-                                'name': '|'.join(mutation_names)
-                            })
-                            shared_loh_flags.append('|'.join(mutation_lohs))
+                    for _list, _function in (
+                        (orphan_gains, self.check_gains),
+                        (orphan_losses, self.check_losses),
+                        (orphan_conversions, self.check_conversions),
+                    ):
+                        _shared = self.resolve_orphan_mutations(
+                            _list,
+                            paths,
+                            _function,
+                        )
+                        if _shared:
+                            _mutations, _loh_flags = zip(*_shared)
+                            shared_mutations.extend(_mutations)
+                            shared_loh_flags.extend(_loh_flags)
 
                     self.sample_called_mutations[sample] = shared_mutations
                     self.sample_called_loh[sample] = shared_loh_flags
-
-            else:
-
-                self.sample_called_mutations[sample] = None
-                self.sample_called_loh[sample] = None
 
     def set_report_mutations_flag(self, p_threshold):
         '''
