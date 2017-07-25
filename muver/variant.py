@@ -680,13 +680,11 @@ class Variant(object):
             a_1 = start_allele
             a_2 = end_allele
 
-            while r[0] == a_1[0] and r[0] == a_2[0]:
+            if r[0] == a_1[0] and r[0] == a_2[0]:
                 r = r[1:]
                 a_1 = a_1[1:]
                 a_2 = a_2[1:]
                 start += 1
-                if not r or not a_1 or not a_2:
-                    break
 
             if r and a_1 and a_2:
                 while r[-1] == a_1[-1] and r[-1] == a_2[-1]:
