@@ -92,6 +92,65 @@ def resolve_loh(loh):
         return 0
 
 
+def get_mutation_name(position, reference_allele, start_allele, end_allele,
+                      ambiguous=False):
+    '''
+    Get the name for a mutation given the start allele and end allele.
+    '''
+    # Allele gain (CNV)
+    if start_allele and not end_allele:
+        if ambiguous:
+            return 'g.{}gain{}'.format(str(position), '*')
+        else:
+            return 'g.{}gain{}'.format(str(position), end_allele)
+    # Allele loss (CNV)
+    elif end_allele and not start_allele:
+        if ambiguous:
+            return 'g.{}loss{}'.format(str(position), '*')
+        else:
+            return 'g.{}loss{}'.format(str(position), start_allele)
+    # Allele conversion
+    else:
+        start = position
+        r = reference_allele
+        a_1 = start_allele
+        a_2 = end_allele
+
+        if r[0] == a_1[0] and r[0] == a_2[0]:
+            r = r[1:]
+            a_1 = a_1[1:]
+            a_2 = a_2[1:]
+            start += 1
+
+        if r and a_1 and a_2:
+            while r[-1] == a_1[-1] and r[-1] == a_2[-1]:
+                r = r[:-1]
+                a_1 = a_1[:-1]
+                a_2 = a_2[:-1]
+                if not r or not a_1 or not a_2:
+                    break
+
+        if r == '':
+            start -= 1
+            end = start + 1
+        else:
+            end = start + min(len(r), max(len(a_1), len(a_2))) - 1
+
+        if end > start:
+            position = '{}_{}'.format(str(start), str(end))
+        else:
+            position = str(start)
+
+        if a_1 == '':
+            event = 'ins' + a_2
+        elif a_2 == '':
+            event = 'del' + a_1
+        else:
+            event = a_1 + '>' + a_2
+
+        return 'g.{}{}'.format(position, event)
+
+
 class Variant(object):
     '''
     Class for MuVer variants.
@@ -657,62 +716,9 @@ class Variant(object):
 
             self.sample_subclonal_bias_binomial[sample] = binomial_p_value
 
-    def get_mutation_name(self, start_allele, end_allele, ambiguous=False):
-        '''
-        Get the name for a mutation given the start allele and end allele.
-        '''
-        # Allele gain (CNV)
-        if start_allele and not end_allele:
-            if ambiguous:
-                return 'g.{}gain{}'.format(str(self.position), '*')
-            else:
-                return 'g.{}gain{}'.format(str(self.position), end_allele)
-        # Allele loss (CNV)
-        elif end_allele and not start_allele:
-            if ambiguous:
-                return 'g.{}loss{}'.format(str(self.position), '*')
-            else:
-                return 'g.{}loss{}'.format(str(self.position), start_allele)
-        # Allele conversion
-        else:
-            start = self.position
-            r = self.ref_allele
-            a_1 = start_allele
-            a_2 = end_allele
-
-            if r[0] == a_1[0] and r[0] == a_2[0]:
-                r = r[1:]
-                a_1 = a_1[1:]
-                a_2 = a_2[1:]
-                start += 1
-
-            if r and a_1 and a_2:
-                while r[-1] == a_1[-1] and r[-1] == a_2[-1]:
-                    r = r[:-1]
-                    a_1 = a_1[:-1]
-                    a_2 = a_2[:-1]
-                    if not r or not a_1 or not a_2:
-                        break
-
-            if r == '':
-                start -= 1
-                end = start + 1
-            else:
-                end = start + min(len(r), max(len(a_1), len(a_2))) - 1
-
-            if end > start:
-                position = '{}_{}'.format(str(start), str(end))
-            else:
-                position = str(start)
-
-            if a_1 == '':
-                event = 'ins' + a_2
-            elif a_2 == '':
-                event = 'del' + a_1
-            else:
-                event = a_1 + '>' + a_2
-
-            return 'g.{}{}'.format(position, event)
+    def _get_mutation_name(self, start_allele, end_allele, ambiguous=False):
+        return get_mutation_name(self.position, self.ref_allele, start_allele,
+                                 end_allele, ambiguous=ambiguous)
 
     def get_all_possible_mutation_transitions(self):
         '''
@@ -724,7 +730,7 @@ class Variant(object):
 
             #  Gain of an allele
             mutations.append({
-                'name': self.get_mutation_name(
+                'name': self._get_mutation_name(
                     None, allele_1, ambiguous=False),
                 'start_allele': None,
                 'end_allele': allele_1,
@@ -733,7 +739,7 @@ class Variant(object):
             })
             #  Loss of an allele
             mutations.append({
-                'name': self.get_mutation_name(
+                'name': self._get_mutation_name(
                     allele_1, None, ambiguous=False),
                 'start_allele': allele_1,
                 'end_allele': None,
@@ -744,7 +750,7 @@ class Variant(object):
             #  Allele 'conversion': one allele to another
             for allele_2 in [a for a in self.alleles if a != allele_1]:
                 mutations.append({
-                    'name': self.get_mutation_name(
+                    'name': self._get_mutation_name(
                         allele_1, allele_2, ambiguous=False),
                     'transitions': {allele_1: -1, allele_2: 1},
                     'start_allele': allele_1,
@@ -898,7 +904,7 @@ class Variant(object):
 
                 similar_mutations.sort(key=lambda x: x['name'])
                 mutation_names = list(
-                    self.get_mutation_name(m['start_allele'], m['end_allele'], ambiguous=True) for m in similar_mutations)
+                    self._get_mutation_name(m['start_allele'], m['end_allele'], ambiguous=True) for m in similar_mutations)
                 mutation_lohs = list(
                     str(resolve_loh(mutation_loh[frozenset(m)])) for m in similar_mutations)
 
