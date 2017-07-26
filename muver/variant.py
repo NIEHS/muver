@@ -657,19 +657,19 @@ class Variant(object):
 
             self.sample_subclonal_bias_binomial[sample] = binomial_p_value
 
-    def get_mutation_name(self, start_allele, end_allele, **kwargs):
+    def get_mutation_name(self, start_allele, end_allele, ambiguous=False):
         '''
         Get the name for a mutation given the start allele and end allele.
         '''
         # Allele gain (CNV)
         if start_allele and not end_allele:
-            if kwargs['ambiguous']:
+            if ambiguous:
                 return 'g.{}gain{}'.format(str(self.position), '*')
             else:
                 return 'g.{}gain{}'.format(str(self.position), end_allele)
         # Allele loss (CNV)
         elif end_allele and not start_allele:
-            if kwargs['ambiguous']:
+            if ambiguous:
                 return 'g.{}loss{}'.format(str(self.position), '*')
             else:
                 return 'g.{}loss{}'.format(str(self.position), start_allele)
