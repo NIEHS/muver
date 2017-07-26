@@ -116,12 +116,6 @@ def get_mutation_name(position, reference_allele, start_allele, end_allele,
         a_1 = start_allele
         a_2 = end_allele
 
-        if r[0] == a_1[0] and r[0] == a_2[0]:
-            r = r[1:]
-            a_1 = a_1[1:]
-            a_2 = a_2[1:]
-            start += 1
-
         if r and a_1 and a_2:
             while r[-1] == a_1[-1] and r[-1] == a_2[-1]:
                 r = r[:-1]
@@ -130,21 +124,32 @@ def get_mutation_name(position, reference_allele, start_allele, end_allele,
                 if not r or not a_1 or not a_2:
                     break
 
-        if r == '':
+        if r and a_1 and a_2:
+            while r[0] == a_1[0] and r[0] == a_2[0]:
+                r = r[1:]
+                a_1 = a_1[1:]
+                a_2 = a_2[1:]
+                start += 1
+                if not r or not a_1 or not a_2:
+                    break
+
+        end = start + len(r) - 1
+        if (r != a_1 and r != a_2) or r == '':
             start -= 1
-            end = start + 1
-        else:
-            end = start + min(len(r), max(len(a_1), len(a_2))) - 1
+            end += 1
 
         if end > start:
             position = '{}_{}'.format(str(start), str(end))
         else:
             position = str(start)
 
-        if a_1 == '':
-            event = 'ins' + a_2
-        elif a_2 == '':
-            event = 'del' + a_1
+        if r == a_1 or r == a_2:
+            if a_1 == '':
+                event = 'ins' + a_2
+            elif a_2 == '':
+                event = 'del' + a_1
+            else:
+                event = a_1 + '>' + a_2
         else:
             event = a_1 + '>' + a_2
 
