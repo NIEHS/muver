@@ -698,7 +698,7 @@ class Variant(object):
                 start -= 1
                 end = start + 1
             else:
-                end = start + len(r) - 1
+                end = start + min(len(r), max(len(a_1), len(a_2))) - 1
 
             if end > start:
                 position = '{}_{}'.format(str(start), str(end))
