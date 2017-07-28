@@ -3,6 +3,7 @@
 """Console script for muver."""
 
 import click
+import os
 
 from allelic_fraction import get_allelic_fractions
 from bias_distribution import calculate_bias_distribution_bam
@@ -141,15 +142,20 @@ def plot_allelic_fraction(bam_file, reference_assembly, output_file):
     )
 
 @main.command()
+@click.option('--output_repeat_file', type=str,
+    help='Specify the output file; otherwise generates the file in place.')
 @click.argument('fasta_file', type=click.Path(exists=True))
-@click.argument('output_repeat_file', type=str)
 def create_repeat_file(fasta_file, output_repeat_file):
     '''
     Create repeat file for the FASTA_FILE sequence.
     '''
+    if output_repeat_file:
+        out = output_repeat_file
+    else:
+        out = '{}.repeats'.format(os.path.splitext(fasta_file)[0])
     _create_repeat_file(
         fasta_file,
-        output_repeat_file,
+        out,
     )
 
 @main.command()
