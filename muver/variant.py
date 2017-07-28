@@ -133,25 +133,24 @@ def get_mutation_name(position, reference_allele, start_allele, end_allele,
                 if not r or not a_1 or not a_2:
                     break
 
-        end = start + len(r) - 1
-        if (r != a_1 and r != a_2) or r == '':
-            start -= 1
-            end += 1
-
-        if end > start:
-            position = '{}_{}'.format(str(start), str(end))
-        else:
-            position = str(start)
-
-        if r == a_1 or r == a_2:
+        end = start + max(len(r) - 1, 0)
+        if r == a_1:
             if a_1 == '':
                 event = 'ins' + a_2
+                start -= 1
             elif a_2 == '':
                 event = 'del' + a_1
             else:
                 event = a_1 + '>' + a_2
         else:
             event = a_1 + '>' + a_2
+            end += 1
+            start -= 1
+
+        if end > start:
+            position = '{}_{}'.format(str(start), str(end))
+        else:
+            position = str(start)
 
         return 'g.{}{}'.format(position, event)
 
