@@ -17,17 +17,14 @@ requirements = [
     'scipy>=0.18.1',
     'matplotlib>=2.0.0',
     'regex>=2017.6.23',
-    # TODO: put package requirements here
 ]
 
 setup_requirements = [
     'pytest-runner',
-    # TODO(lavenderca): put setup requirements (distutils extensions, etc.) here
 ]
 
 test_requirements = [
     'pytest',
-    # TODO: put package test requirements here
 ]
 
 setup(
