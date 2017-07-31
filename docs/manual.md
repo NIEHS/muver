@@ -1,7 +1,4 @@
 # muver
-This package was created with [Cookiecutter](https://github.com/audreyr/cookiecutter) and the [audreyr/cookiecutter-pypackage](https://github.com/audreyr/cookiecutter-pypackage) project template.
-
-## Overview
 muver is designed to call mutations in outgrowths from mutation accummulation experiments. Developed to address specific experimental challenges in yeast, muver is designed to leverage high sequencing depth and access to data from both ancestor and progeny.
 
 ## Requirements
