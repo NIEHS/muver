@@ -653,7 +653,7 @@ class Variant(object):
             self.sample_subclonal_bias_log_normal[sample] = \
                 log_normal_p_value
 
-    def subclonal_binomial_test(self):
+    def subclonal_binomial_test(self, p_threshold):
         '''
         Perform binomial test for the subclonal allele comparing against the
         frequency expected given the called genotype.
@@ -683,6 +683,13 @@ class Variant(object):
                     sample_sum,
                     1.0 - eaf[genotype, (None, None, None)][subclonal_allele],
                 )
+
+                if binomial_p_value > p_threshold:
+                    self.sample_subclonal_alleles[sample] = None
+                    self.sample_subclonals[sample] = {
+                        'genotype': None,
+                        'frequency': None,
+                    }
             else:
                 binomial_p_value = None
 

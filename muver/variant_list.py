@@ -151,7 +151,7 @@ class VariantList(object):
             variant.find_repeat_expanded_alleles()
             variant.call_genotypes_and_subclonal_alleles()
             variant.subclonal_strand_bias_log_normal_test(samples)
-            variant.subclonal_binomial_test()
+            variant.subclonal_binomial_test(self.p_threshold)
             variant.subclonal_strand_bias_binomial_test()
             variant.call_mutations()
             variant.set_report_mutations_flag(self.p_threshold)
