@@ -1,5 +1,5 @@
 # muver
-muver is designed to call mutations in outgrowths from mutation accummulation experiments. Developed to address specific experimental challenges in yeast, muver is designed to leverage high sequencing depth and access to data from both ancestor and progeny.
+muver is an analytical framework developed to improve sensitivity and increase accuracy in mutation identification from high-throughput sequencing data. muver provides significantly increased accuracy in challenging genomic contexts, including low complexity repetitive sequences. The muver framework has been applied to data from mutation accumulation experiments in yeast.
 
 ## Requirements
 muver was developed using Python 2.7.13. In addition to requirements specified in setup.py, muver requires installation of the following tools:
