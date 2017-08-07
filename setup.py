@@ -35,7 +35,7 @@ setup(
     author="Christopher Andrew Lavender",
     author_email='christopher.lavender@nih.gov',
     url='https://github.com/lavenderca/muver',
-    packages=find_packages(include=['muver']),
+    packages=find_packages(include=['muver', 'muver.wrappers']),
     entry_points={
         'console_scripts': [
             'muver=muver.cli:main'
