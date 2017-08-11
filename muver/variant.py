@@ -318,12 +318,12 @@ class Variant(object):
         chi = self.chisquare_p_values
 
         log_p = -math.log10(p_threshold)
-        composite_p_values = []
 
         for sample in [s for s in self.samples if s != self.control_sample]:
 
             significance_flag = False
             _chi = max(chi[sample], sys.float_info.epsilon)
+            composite_p_values = []
 
             for allele in self.alleles:
 
