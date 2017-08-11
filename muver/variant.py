@@ -322,15 +322,15 @@ class Variant(object):
         for sample in [s for s in self.samples if s != self.control_sample]:
 
             significance_flag = False
-            _chi = max(chi[sample], sys.float_info.epsilon)
+            _chi = max(chi[sample], sys.float_info.min)
             composite_p_values = []
 
             for allele in self.alleles:
 
                 _binom_forward = max(binom[sample][allele]['forward'],
-                    sys.float_info.epsilon)
+                    sys.float_info.min)
                 _binom_reverse = max(binom[sample][allele]['reverse'],
-                    sys.float_info.epsilon)
+                    sys.float_info.min)
 
                 comp = math.sqrt(
                     (-math.log10(_binom_forward)) ** 2 +
