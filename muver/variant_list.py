@@ -231,7 +231,7 @@ class VariantList(object):
             'Intersects Repeat',
             'Repeat Correction Applied',
             '{} Depths'.format(self.control_sample.sample_name),
-            '{} Zeros Flag'.format(self.control_sample.sample_name),
+            '{} Allele Count Flag'.format(self.control_sample.sample_name),
             '{} Depth Flag'.format(self.control_sample.sample_name),
             '{} Filter Flag'.format(self.control_sample.sample_name),
             '{} Ploidy'.format(self.control_sample.sample_name),
@@ -245,11 +245,11 @@ class VariantList(object):
         for sample in [s for s in self.samples if s != self.control_sample]:
             output_headers.extend([
                 '{} Depths'.format(sample.sample_name),
-                '{} Zeros Flag'.format(sample.sample_name),
+                '{} Allele Count Flag'.format(sample.sample_name),
                 '{} Depth Flag'.format(sample.sample_name),
                 '{} Filter Flag'.format(sample.sample_name),
-                '{} Composite P Value'.format(sample.sample_name),
-                '{} Significant Flag'.format(sample.sample_name),
+                '{} Composite Score'.format(sample.sample_name),
+                '{} Read Difference Flag'.format(sample.sample_name),
                 '{} Ploidy'.format(sample.sample_name),
                 '{} Genotype'.format(sample.sample_name),
                 '{} Subclonal Genotype'.format(sample.sample_name),
@@ -257,7 +257,7 @@ class VariantList(object):
                 '{} Genotyping Score'.format(sample.sample_name),
                 '{} Subclonal Valid Flag'.format(sample.sample_name),
                 '{} Mutations'.format(sample.sample_name),
-                '{} LoH Flag'.format(sample.sample_name),
+                '{} PAC Flag'.format(sample.sample_name),
             ])
 
         with open(output_fn, 'w') as OUTPUT:
@@ -340,7 +340,7 @@ class VariantList(object):
             write_vcf_info('FORMAT', 'SGT', '1', 'String', 'Subclonal genotype', OUTPUT)
             write_vcf_info('FORMAT', 'SF', '1', 'Float', 'Subclonal frequency', OUTPUT)
             write_vcf_info('FORMAT', 'SV', '0', 'Flag', 'Subclonal valid flag', OUTPUT)
-            write_vcf_info('FORMAT', 'SIG', '0', 'Flag', 'Significance flag', OUTPUT)
+            write_vcf_info('FORMAT', 'RD', '0', 'Flag', 'Read difference flag', OUTPUT)
             write_vcf_info('FORMAT', 'MT', '.', 'String', 'Called mutations', OUTPUT)
             write_vcf_info('FORMAT', 'PAC', '.', 'String', 'Called PAC flags', OUTPUT)
 
