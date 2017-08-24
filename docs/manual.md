@@ -163,7 +163,7 @@ The tab-delimited table contains the following fields for each mutation:
 * "CONTROL_SAMPLE Depths"
 
   Per-allele, per-strand read depths for all alleles. For instance, the first two values correspond to the forward and reverse strand read counts of the first listed allele.
-* "CONTROL_SAMPLE Zeros Flag"
+* "CONTROL_SAMPLE Allele Count Flag"
 
   Indicates if at least two per-allele, per-strand depth values are greater than zero.
 * "CONTROL_SAMPLE Depth Flag"
@@ -193,7 +193,7 @@ The following additional fields are included for each non-control sample:
 * "SAMPLE Depths"
 
   Per-allele, per-strand read depths for all alleles. For instance, the first two values correspond to the forward and reverse strand read counts of the first listed allele.
-* "SAMPLE Zeros Flag"
+* "SAMPLE Allele Count Flag"
 
   Indicates if at least two per-allele, per-strand depth values are greater than zero.
 * "SAMPLE Depth Flag"
@@ -202,12 +202,12 @@ The following additional fields are included for each non-control sample:
 * "SAMPLE Filter Flag"
 
   Indicates if the variant position intersects the filtered regions for the sample.
-* "SAMPLE Composite P Value"
+* "SAMPLE Composite Score"
 
-  Composite P value for mutation calling. Made relative to the control sample.
-* "SAMPLE Significant Flag"
+  Composite score for mutation calling. Made relative to the control sample.
+* "SAMPLE Read Difference Flag"
 
-  Indicates if the called mutations pass significance thresholds. Considers both composite and individual P values.
+  Indicates if the called mutations pass thresholds. Considers both composite score and individual P values.
 * "SAMPLE Ploidy"
 
   Ploidy for the sample at this position.
@@ -233,7 +233,7 @@ The following additional fields are included for each non-control sample:
   * If a non-reference allele is mutated, the position is given as the flanking nucleotides of the reference allele. For instance, if at genomic position 100 an A to C SNP was called where the reference allele was G, the following name would be used: g.99_101A>C.
   * Mutations are only identified as 'ins' or 'del' if the reference allele is modified. Otherwise, '>' notation is used. For instance, if a AT to A mutation was called where the reference allele was G at genomic position 100, the following name would be used: g.99_101AT>A
 
-* "SAMPLE LoH Flag"
+* "SAMPLE PAC Flag"
 
   Identifies a conversion event from one allele to another. Reported in a comma-delimited list with each entry corresponding to a called mutation.
 
@@ -278,9 +278,9 @@ The VCF file contains the following FORMAT fields for each sample:
 * SV: Subclonal valid flag
 
   Indicates if validity tests for the subclonal allele pass thresholds.
-* SIG: Signficance flag
+* RD: Read difference flag
 
-  Indicates if the called mutations pass significance thresholds. Considers both composite and individual P values.
+  Indicates if the called mutations pass thresholds. Considers both composite and individual P values.
 * MT: Called mutations
 
   Comma-delimited list of called mutations.
