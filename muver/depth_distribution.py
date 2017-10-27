@@ -109,7 +109,7 @@ def process_chromosome_values(chromosome, chromosome_values, mu, sigma, OUT,
                    to generate depth thresholds for filtering.
     '''
     def write_position_to_filter(chromosome, position, depth, p):
-        OUT.write('{}\t{}\t{}\n'.format(
+        OUT.write('{}\t{}\t{}\t{}\n'.format(
             chromosome,
             str(i + 1),
             str(chromosome_values[i]),
