@@ -234,6 +234,7 @@ def fit_rates(indel_rates):
                 for i, val in enumerate(repeat_rates):
                     diff = abs(val - mid_value)
                     if diff < mid_diff:
+                        mid_diff = diff
                         p0_x0 = tract_lengths[i]
 
                 popt, pcov = curve_fit(
