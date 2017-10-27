@@ -180,24 +180,8 @@ def filter_regions_by_depth(depths, chrom_sizes, mu, sigma,
 
         for chromosome in sorted(depths.keys()):
 
-            chromosome_depths = depths[chromosome]
-            chromosome_values = []
-            last_pos = 0
-
-            for depth in chromosome_depths:
-
-                for __ in range(last_pos + 1, depth['position']):
-                    chromosome_values.append(0)
-
-                chromosome_values.append(depth['coverage'])
-
-                last_pos = depth['position']
-
-            for __ in range(last_pos + 1, chrom_sizes[chromosome] + 1):
-                chromosome_values.append(0)
-
             process_chromosome_values(
-                chromosome, chromosome_values, mu, sigma, OUT)
+                chromosome, depths[chromosome], mu, sigma, OUT)
 
 
 def filter_regions_by_depth_bedgraph(bedgraph_file, chrom_sizes, mu,
@@ -216,13 +200,11 @@ def filter_regions_by_depth_bedgraph(bedgraph_file, chrom_sizes, mu,
             coverage = int(coverage)
 
             if chromosome not in depths:
-                depths[chromosome] = []
+                depths[chromosome] = numpy.zeros(chrom_sizes[chromosome], \
+                    dtype=numpy.int32)
 
             for position in range(start, end + 1):
-                depths[chromosome].append({
-                    'position': position,
-                    'coverage': coverage
-                })
+                depths[chromosome][position - 1] = coverage
 
     filter_regions_by_depth(depths, chrom_sizes, mu, sigma,
         filtered_regions_output)
@@ -245,7 +227,8 @@ def filter_regions_by_depth_mpileup(mpileup_file, chrom_sizes, mu,
             coverage = int(coverage)
 
             if chromosome not in depths:
-                depths[chromosome] = []
+                depths[chromosome] = numpy.zeros(chrom_sizes[chromosome], \
+                    dtype=numpy.int32)
 
             if int(coverage) > 0:
                 bases = line_split[4]
@@ -261,10 +244,7 @@ def filter_regions_by_depth_mpileup(mpileup_file, chrom_sizes, mu,
                 i += 1
 
             if coverage > 0:
-                depths[chromosome].append({
-                    'position': position,
-                    'coverage': coverage,
-                })
+                depths[chromosome][position - 1] = coverage
 
     filter_regions_by_depth(depths, chrom_sizes, mu, sigma,
         filtered_regions_output)
