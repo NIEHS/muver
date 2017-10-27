@@ -203,10 +203,13 @@ class VariantList(object):
 
                     for i, fields in enumerate(sample_fields):
                         sample = sample_indices[i]
-                        try:
-                            counts = fields.split(':')[sac_index].split(',')
-                        except IndexError:
+                        if sac_index == None:
                             counts = [0] * len(alleles) * 2
+                        else:
+                            try:
+                                counts = fields.split(':')[sac_index].split(',')
+                            except IndexError:
+                                counts = [0] * len(alleles) * 2
 
                         for allele in alleles:
                             forward = int(counts.pop(0))
