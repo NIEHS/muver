@@ -98,13 +98,13 @@ def get_mutation_name(position, reference_allele, start_allele, end_allele,
     Get the name for a mutation given the start allele and end allele.
     '''
     # Allele gain (CNV)
-    if start_allele and not end_allele:
+    if end_allele and not start_allele:
         if ambiguous:
             return 'g.{}gain{}'.format(str(position), '*')
         else:
             return 'g.{}gain{}'.format(str(position), end_allele)
     # Allele loss (CNV)
-    elif end_allele and not start_allele:
+    elif start_allele and not end_allele:
         if ambiguous:
             return 'g.{}loss{}'.format(str(position), '*')
         else:
