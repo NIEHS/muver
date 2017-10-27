@@ -44,6 +44,40 @@ def read_chrom_sizes(reference_assembly_fn):
 
     return chrom_sizes
 
+def read_repeats_var(repeats_fn, var):
+    '''
+    Read repeats from an input file and return in a dict only those
+    that intersect with a given list of variants.
+    '''
+    repeats = dict()
+
+    with open(repeats_fn) as f:
+
+        for line in f:
+            chromosome, sequence, unit_length, unit, start, end = \
+                line.strip().split('\t')
+            start = int(start)
+            end = int(end)
+            if chromosome not in repeats:
+                repeats[chromosome] = dict()
+            if len(sequence) >= 4:
+                for i in range(start, end + 1):
+                    if (chromosome, i) in var:
+                        if i in repeats[chromosome]:
+                            repeats[chromosome][i].append({
+                                'sequence': sequence,
+                                'unit': unit,
+                                'start': start,
+                            })
+
+                        else:
+                            repeats[chromosome][i] = [{
+                                'sequence': sequence,
+                                'unit': unit,
+                                'start': start,
+                            }]
+
+    return repeats
 
 def read_repeats(repeats_fn):
     '''

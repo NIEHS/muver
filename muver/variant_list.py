@@ -2,7 +2,7 @@ import math
 import numpy
 
 from variant import Variant
-from utils import read_excluded_regions, read_repeats, read_filtered_sites
+from utils import read_excluded_regions, read_repeats_var, read_filtered_sites
 
 
 def get_allele_values(alleles, in_dict):
@@ -132,10 +132,16 @@ class VariantList(object):
         else:
             excluded_regions = set()
 
-        repeats = read_repeats(self.repeats_fn)
         filtered_sites = read_filtered_sites(self.samples)
 
         self.read_variants_from_vcf()
+
+        var_dict=dict()
+
+        for variant in self.variants:
+            var_dict[(variant.chromosome, variant.position)] = 0
+
+        repeats = read_repeats_var(self.repeats_fn, var_dict)
 
         for variant in self.variants:
 
