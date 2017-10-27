@@ -269,18 +269,12 @@ def plot_fits(indel_rates, fits, output_header):
             rates = indel_rates[event][repeat_length]
 
             tract_lengths = []
-            repeat_rates = []
-
-            for tract_length, rate in rates.items():
-
-                tract_lengths.append(tract_length)
-                repeat_rates.append(math.log10(rate))
-
             fitted_values = []
             raw_values = []
 
-            for i, x in enumerate(sorted(tract_lengths)):
-                raw_values.append(repeat_rates[i])
+            for x in sorted(rates.keys()):
+                tract_lengths.append(x)
+                raw_values.append(math.log10(rates[x]))
 
                 fitted = logistic(
                     x,
