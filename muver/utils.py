@@ -21,6 +21,27 @@ def read_excluded_regions(excluded_regions_fn):
     return excluded_regions
 
 
+def read_cnv_bedgraph(cnv_bedgraph):
+        '''
+        Read CNV regions from an input bedGraph file. Return as a dict.
+        '''
+        cnv_regions = dict()
+
+        with open(cnv_bedgraph) as f:
+
+            for line in f:
+
+                chromosome, start, end, ploidy = line.strip().split()
+                start = int(start) + 1
+                end = int(end)
+                ploidy = int(ploidy)
+
+                for i in range(start, end + 1):
+                    cnv_regions[(chromosome, i)] = ploidy
+
+        return cnv_regions
+
+
 def read_chrom_sizes(reference_assembly_fn):
     '''
     Iterate through a reference assembly to find length of associated

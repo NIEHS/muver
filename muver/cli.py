@@ -222,18 +222,24 @@ def calculate_bias_distribution(bam_file, reference_assembly,
 @click.option('--output_filtered_regions', type=str, default=None,
               help='If OUTPUT_FILTERED_REGIONS is specified, positions to be '
               'filtered based on abnormal depth will be written to this file.')
+@click.option('--ploidy', type=int, default=2, help='Global ploidy')
+@click.option('--cnv_bedgraph_file', type=str, default=None,
+              help='bedGraph file describing CNV regions')
 @click.argument('bedgraph_file', type=click.Path(exists=True))
 @click.argument('reference_assembly', type=click.Path(exists=True))
 @click.argument('output_depth_distribution', type=str)
 def calculate_depth_distribution(bedgraph_file, reference_assembly,
                                  output_depth_distribution,
-                                 output_filtered_regions):
+                                 output_filtered_regions, ploidy,
+                                 cnv_bedgraph_file):
     '''
     Calculate distribution of depths in a bedGraph file.
     '''
     mu, sigma = calculate_depth_distribution_bedgraph(
         bedgraph_file,
         output_depth_distribution,
+        ploidy,
+        cnv_bedgraph_file
     )
     chrom_sizes = read_chrom_sizes(reference_assembly)
     if output_filtered_regions:
@@ -243,6 +249,8 @@ def calculate_depth_distribution(bedgraph_file, reference_assembly,
             mu,
             sigma,
             output_filtered_regions,
+            ploidy,
+            cnv_bedgraph_file
         )
 
 @main.command()

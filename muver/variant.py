@@ -360,10 +360,9 @@ class Variant(object):
         for sample in self.samples:
             self.sample_ploidy[sample] = sample.ploidy
 
-            if sample.cnv_regions:
-                if position in sample.cnv_regions:
-                    self.sample_ploidy[sample] = \
-                        sample.cnv_regions[position]
+            if position in sample.cnv_regions:
+                self.sample_ploidy[sample] = \
+                    sample.cnv_regions[position]
 
     def intersect_with_repeats(self, repeats):
         '''

@@ -98,7 +98,8 @@ def analyze_depth_distribution(args):
     Return the passed index and the standard deviation of the log-normal
     distribution fit to strand bias values.
     '''
-    index, intermediate_files, reference_assembly, chrom_sizes = args
+    index, intermediate_files, reference_assembly, chrom_sizes, \
+        ploidy, cnv_regions = args
 
     samtools.run_mpileup(
         intermediate_files['merged_bam'],
@@ -121,6 +122,8 @@ def analyze_depth_distribution(args):
     mu, sigma = depth_dist.calculate_depth_distribution_mpileup(
         intermediate_files['_mpileup_out'],
         intermediate_files['depth_distribution'],
+        ploidy,
+        cnv_regions
     )
 
     depth_dist.filter_regions_by_depth_mpileup(
@@ -129,6 +132,8 @@ def analyze_depth_distribution(args):
         mu,
         sigma,
         intermediate_files['filtered_sites'],
+        ploidy,
+        cnv_regions
     )
 
     return index, strand_bias_std
@@ -209,6 +214,8 @@ def run_pipeline(reference_assembly, fastq_list, control_sample,
         [s.get_intermediate_file_names() for s in samples],
         repeat(reference_assembly),
         repeat(chrom_sizes),
+        [s.ploidy for s in samples],
+        [s.cnv_regions for s in samples],
     ))
     for index, strand_bias_std in strand_bias_std_values:
         samples[index].strand_bias_std = strand_bias_std

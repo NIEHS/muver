@@ -1,6 +1,7 @@
 import numpy
 from scipy.stats import norm
 from scipy.optimize import curve_fit
+from utils import read_cnv_bedgraph
 
 from fitting import gaussian
 
@@ -40,11 +41,17 @@ def calculate_depth_distribution(depths, output):
     return mu, sigma
 
 
-def calculate_depth_distribution_bedgraph(in_bedgraph, output):
+def calculate_depth_distribution_bedgraph(in_bedgraph, output, ploidy=2,
+                                          cnv_bedgraph_file=None):
     '''
-    Read depths from a bedGraph file into a list and pass to
-    calculate_depth_distribution.
+    Read depths from a bedGraph file, determine coverage per copy,
+    and pass to calculate_depth_distribution.
     '''
+    if cnv_bedgraph_file is not None:
+        cnv_regions = read_cnv_bedgraph(cnv_bedgraph_file)
+    else:
+        cnv_regions = dict()
+
     depths = []
 
     with open(in_bedgraph) as f:
@@ -52,15 +59,20 @@ def calculate_depth_distribution_bedgraph(in_bedgraph, output):
 
             chromosome, start, end, coverage = line.strip().split()
             for i in range(int(start), int(end)):
-                depths.append(int(coverage))
+                if (chromosome, i) in cnv_regions:
+                    depths.append(int(float(coverage) / \
+                        cnv_regions[(chromosome, i)]))
+                else:
+                    depths.append(int(float(coverage) / ploidy))
 
     return calculate_depth_distribution(depths, output)
 
 
-def calculate_depth_distribution_mpileup(input_mpileup, output):
+def calculate_depth_distribution_mpileup(input_mpileup, output, ploidy,
+                                         cnv_regions):
     '''
-    Read depths from a mpileup TXT file and pass to
-    calculate_depth_distribution.
+    Read depths from a mpileup TXT file, determine coverage per copy,
+    and pass to calculate_depth_distribution.
     '''
     depths = []
 
@@ -71,7 +83,7 @@ def calculate_depth_distribution_mpileup(input_mpileup, output):
 
             chromosome, position, reference_base, coverage = line_split[:4]
             position = int(position)
-            coverage = int(coverage)
+            coverage = float(coverage)
             if int(coverage) > 0:
                 bases = line_split[4]
             else:
@@ -86,7 +98,11 @@ def calculate_depth_distribution_mpileup(input_mpileup, output):
                 i += 1
 
             if coverage > 0:
-                depths.append(coverage)
+                if (chromosome, position) in cnv_regions:
+                    depths.append(int(coverage / \
+                        cnv_regions[(chromosome, position)]))
+                else:
+                    depths.append(int(coverage / ploidy))
 
     return calculate_depth_distribution(depths, output)
 
@@ -185,11 +201,17 @@ def filter_regions_by_depth(depths, chrom_sizes, mu, sigma,
 
 
 def filter_regions_by_depth_bedgraph(bedgraph_file, chrom_sizes, mu,
-                                     sigma, filtered_regions_output):
+                                     sigma, filtered_regions_output,
+                                     ploidy=2, cnv_bedgraph_file=None):
     '''
     Pass depths read from a bedGraph file to filter_regions_by_depth.
     '''
     depths = dict()
+
+    if cnv_bedgraph_file is not None:
+        cnv_regions = read_cnv_bedgraph(cnv_bedgraph_file)
+    else:
+        cnv_regions = dict()
 
     with open(bedgraph_file) as f:
         for line in f:
@@ -197,21 +219,26 @@ def filter_regions_by_depth_bedgraph(bedgraph_file, chrom_sizes, mu,
             chromosome, start, end, coverage = line.strip().split()
             start = int(start) + 1  # Convert from zero-based
             end = int(end)
-            coverage = int(coverage)
+            coverage = float(coverage)
 
             if chromosome not in depths:
                 depths[chromosome] = numpy.zeros(chrom_sizes[chromosome], \
                     dtype=numpy.int32)
 
             for position in range(start, end + 1):
-                depths[chromosome][position - 1] = coverage
+                if (chromosome, position) in cnv_regions:
+                    depths[chromosome][position - 1] = int(coverage / \
+                        cnv_regions[(chromosome, position)])
+                else:
+                    depths[chromosome][position - 1] = int(coverage / ploidy)
 
     filter_regions_by_depth(depths, chrom_sizes, mu, sigma,
         filtered_regions_output)
 
 
 def filter_regions_by_depth_mpileup(mpileup_file, chrom_sizes, mu,
-                                     sigma, filtered_regions_output):
+                                     sigma, filtered_regions_output,
+                                     ploidy, cnv_regions):
     '''
     Pass depths read from a mplieup TXT file to filter_regions_by_depth.
     '''
@@ -224,7 +251,7 @@ def filter_regions_by_depth_mpileup(mpileup_file, chrom_sizes, mu,
 
             chromosome, position, reference_base, coverage = line_split[:4]
             position = int(position)
-            coverage = int(coverage)
+            coverage = float(coverage)
 
             if chromosome not in depths:
                 depths[chromosome] = numpy.zeros(chrom_sizes[chromosome], \
@@ -244,7 +271,11 @@ def filter_regions_by_depth_mpileup(mpileup_file, chrom_sizes, mu,
                 i += 1
 
             if coverage > 0:
-                depths[chromosome][position - 1] = coverage
+                if (chromsome, position) in cnv_regions:
+                    depths[chromosome][position - 1] = int(coverage / \
+                        cnv_regions[(chromosome, position)])
+                else:
+                    depths[chromosome][position - 1] = int(coverage / ploidy)
 
     filter_regions_by_depth(depths, chrom_sizes, mu, sigma,
         filtered_regions_output)
