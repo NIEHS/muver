@@ -66,7 +66,7 @@ def mpileup_iter(bam_file, ref_fn):
         '-d', '100000',
         '-f', ref_fn,
         bam_file,
-    ], stdout=subprocess.PIPE, stderr=open(os.devnull, 'w'))
+    ], stdout=subprocess.PIPE, stderr=open(os.devnull, 'w'), bufsize=1)
     return iter(proc.stdout.readline, '')
 
 
@@ -88,7 +88,7 @@ def view_bam(input_bam):
     proc = subprocess.Popen([
         PATHS['samtools'], 'view',
         input_bam,
-    ], stdout=subprocess.PIPE, stderr=open(os.devnull, 'w'))
+    ], stdout=subprocess.PIPE, stderr=open(os.devnull, 'w'), bufsize=1)
     return iter(proc.stdout.readline, '')
 
 
