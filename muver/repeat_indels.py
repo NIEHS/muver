@@ -231,9 +231,10 @@ def fit_rates(indel_rates):
 
                 mid_value = (max(repeat_rates) + min(repeat_rates)) / 2
                 mid_diff = float('inf')
+                peak_length = tract_lengths[repeat_rates.index(max(repeat_rates))]
                 for i, val in enumerate(repeat_rates):
                     diff = abs(val - mid_value)
-                    if diff < mid_diff:
+                    if diff < mid_diff and tract_lengths[i] <= peak_length:
                         mid_diff = diff
                         p0_x0 = tract_lengths[i]
 
