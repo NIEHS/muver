@@ -271,7 +271,7 @@ def filter_regions_by_depth_mpileup(mpileup_file, chrom_sizes, mu,
                 i += 1
 
             if coverage > 0:
-                if (chromsome, position) in cnv_regions:
+                if (chromosome, position) in cnv_regions:
                     depths[chromosome][position - 1] = int(coverage / \
                         cnv_regions[(chromosome, position)])
                 else:
