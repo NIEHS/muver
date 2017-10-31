@@ -220,18 +220,24 @@ def calculate_bias_distribution(bam_file, reference_assembly,
 
 @main.command()
 @click.option('--output_filtered_regions', type=str, default=None,
-              help='If OUTPUT_FILTERED_REGIONS is specified, positions to be '
+              help='If OUTPUT_FILTERED_REGIONS is specified, regions to be '
               'filtered based on abnormal depth will be written to this file.')
 @click.option('--ploidy', type=int, default=2, help='Global ploidy')
 @click.option('--cnv_bedgraph_file', type=str, default=None,
               help='bedGraph file describing CNV regions')
+@click.option('--p_threshold', type=float, default=0.0001,
+              help='p-value threshold for abnormal depth')
+@click.option('--merge_window', type=int, default=1000,
+              help='maximum distance of adjacent abnormal sites \
+              for creation of filtered regions')
 @click.argument('bedgraph_file', type=click.Path(exists=True))
 @click.argument('reference_assembly', type=click.Path(exists=True))
 @click.argument('output_depth_distribution', type=str)
 def calculate_depth_distribution(bedgraph_file, reference_assembly,
                                  output_depth_distribution,
                                  output_filtered_regions, ploidy,
-                                 cnv_bedgraph_file):
+                                 cnv_bedgraph_file, p_threshold,
+                                 merge_window):
     '''
     Calculate distribution of depths in a bedGraph file.
     '''
@@ -239,7 +245,7 @@ def calculate_depth_distribution(bedgraph_file, reference_assembly,
         bedgraph_file,
         output_depth_distribution,
         ploidy,
-        cnv_bedgraph_file
+        cnv_bedgraph_file,
     )
     chrom_sizes = read_chrom_sizes(reference_assembly)
     if output_filtered_regions:
@@ -250,7 +256,9 @@ def calculate_depth_distribution(bedgraph_file, reference_assembly,
             sigma,
             output_filtered_regions,
             ploidy,
-            cnv_bedgraph_file
+            cnv_bedgraph_file,
+            p_threshold,
+            merge_window,
         )
 
 @main.command()

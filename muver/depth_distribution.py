@@ -108,7 +108,7 @@ def calculate_depth_distribution_mpileup(input_mpileup, output, ploidy,
 
 
 def process_chromosome_values(chromosome, chromosome_values, mu, sigma, OUT,
-                              window=51, p_threshold=0.01):
+                              p_threshold=0.0001, merge_window=1000, window=51):
     '''
     Go over depth values for a given chromosome in an input list and write
     to a list of filtered positions if a position is less or greater than
@@ -124,12 +124,11 @@ def process_chromosome_values(chromosome, chromosome_values, mu, sigma, OUT,
     p_threshold -- Probability applied to the CDF of the normal distribution
                    to generate depth thresholds for filtering.
     '''
-    def write_position_to_filter(chromosome, position, depth, p):
-        OUT.write('{}\t{}\t{}\t{}\n'.format(
+    def write_interval_to_filter(chromosome, start, end):
+        OUT.write('{}\t{}\t{}\n'.format(
             chromosome,
-            str(i + 1),
-            str(chromosome_values[i]),
-            str(p),
+            str(start),
+            str(end + 1),
         ))
 
     d = int((window - 1) / 2)
@@ -137,6 +136,11 @@ def process_chromosome_values(chromosome, chromosome_values, mu, sigma, OUT,
 
     keep_threshold = [mu, mu]
     filter_threshold = [float('-inf'), float('inf')]
+
+    first = float('inf')
+    last = float('-inf')
+    side = 0
+    last_side = 0
 
     for i in range(d, len(chromosome_values) - d):
 
@@ -147,47 +151,72 @@ def process_chromosome_values(chromosome, chromosome_values, mu, sigma, OUT,
             window_depth <= keep_threshold[1]
         ):
             if (
-                window_depth <= filter_threshold[0] and
+                window_depth <= filter_threshold[0] or
                 window_depth >= filter_threshold[1]
             ):
-                write_position_to_filter(
-                    chromosome,
-                    str(i + 1),
-                    str(chromosome_values[i]),
-                    p,
-                )
+                if window_depth < mu:
+                    side = -1
+                else:
+                    side = 1
+                if i - last > merge_window or last_side * side == -1:
+                    if last - first > 0:
+                        write_interval_to_filter(
+                            chromosome,
+                            first,
+                            last,
+                        )
+                    first = i
+                last = i
+                last_side = side
             else:
                 if window_depth < mu:
+                    side = -1
                     p = norm_dist.cdf(window_depth)
 
                     if p >= p_threshold:
                         keep_threshold[0] = window_depth
                     else:
                         filter_threshold[0] = window_depth
-                        write_position_to_filter(
-                            chromosome,
-                            str(i + 1),
-                            str(chromosome_values[i]),
-                            p,
-                        )
+                        if i - last > merge_window or last_side * side == -1:
+                            if last - first > 0:
+                                write_interval_to_filter(
+                                    chromosome,
+                                    first,
+                                    last,
+                                )
+                            first = i
+                        last = i
+                        last_side = side
 
                 elif window_depth > mu:
+                    side = 1
                     p = 1. - norm_dist.cdf(window_depth)
 
                     if p >= p_threshold:
                         keep_threshold[1] = window_depth
                     else:
                         filter_threshold[1] = window_depth
-                        write_position_to_filter(
-                            chromosome,
-                            str(i + 1),
-                            str(chromosome_values[i]),
-                            p,
-                        )
+                        if i - last > merge_window or last_side * side == -1:
+                            if last - first > 0:
+                                write_interval_to_filter(
+                                    chromosome,
+                                    first,
+                                    last,
+                                )
+                            first = i
+                        last = i
+                        last_side = side
+    if last - first > 0:
+        write_interval_to_filter(
+            chromosome,
+            first,
+            last,
+        )
 
 
 def filter_regions_by_depth(depths, chrom_sizes, mu, sigma,
-                            filtered_regions_output):
+                            filtered_regions_output, p_threshold=0.0001,
+                            merge_window=1000):
     '''
     Filter positions by depth observing a normal distribution.  See
     process_chromosome_values for additional details.
@@ -197,12 +226,14 @@ def filter_regions_by_depth(depths, chrom_sizes, mu, sigma,
         for chromosome in sorted(depths.keys()):
 
             process_chromosome_values(
-                chromosome, depths[chromosome], mu, sigma, OUT)
+                chromosome, depths[chromosome], mu, sigma, OUT, \
+                p_threshold, merge_window)
 
 
 def filter_regions_by_depth_bedgraph(bedgraph_file, chrom_sizes, mu,
                                      sigma, filtered_regions_output,
-                                     ploidy=2, cnv_bedgraph_file=None):
+                                     ploidy=2, cnv_bedgraph_file=None,
+                                     p_threshold=0.0001, merge_window=1000):
     '''
     Pass depths read from a bedGraph file to filter_regions_by_depth.
     '''
@@ -232,13 +263,14 @@ def filter_regions_by_depth_bedgraph(bedgraph_file, chrom_sizes, mu,
                 else:
                     depths[chromosome][position - 1] = int(coverage / ploidy)
 
-    filter_regions_by_depth(depths, chrom_sizes, mu, sigma,
-        filtered_regions_output)
+    filter_regions_by_depth(depths, chrom_sizes, mu, sigma, \
+        filtered_regions_output, p_threshold, merge_window)
 
 
 def filter_regions_by_depth_mpileup(mpileup_file, chrom_sizes, mu,
                                      sigma, filtered_regions_output,
-                                     ploidy, cnv_regions):
+                                     ploidy, cnv_regions, p_threshold=0.0001,
+                                     merge_window=1000):
     '''
     Pass depths read from a mplieup TXT file to filter_regions_by_depth.
     '''
@@ -278,4 +310,4 @@ def filter_regions_by_depth_mpileup(mpileup_file, chrom_sizes, mu,
                     depths[chromosome][position - 1] = int(coverage / ploidy)
 
     filter_regions_by_depth(depths, chrom_sizes, mu, sigma,
-        filtered_regions_output)
+        filtered_regions_output, p_threshold, merge_window)

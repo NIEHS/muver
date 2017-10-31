@@ -166,7 +166,8 @@ def read_filtered_sites(samples):
 
         with open(sample.filtered_sites) as f:
             for line in f:
-                chromosome, position = line.strip().split('\t')[:2]
-                filtered_sites[sample].add((chromosome, int(position)))
+                chromosome, start, end = line.strip().split('\t')
+                for position in range(int(start) + 1, int(end) + 1):
+                    filtered_sites[sample].add((chromosome, position))
 
     return filtered_sites
