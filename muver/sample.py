@@ -138,7 +138,7 @@ class Sample(object):
                 ('merged_bam', 'bams', '{}.bam'),
                 ('depth_bedgraph', 'depth_distributions', '{}.bedGraph'),
                 ('filtered_sites', 'filtered_sites',
-                    '{}.filtered_sites.txt'),
+                    '{}.filtered_sites.bed'),
                 ('strand_bias_distribution', 'depth_distributions',
                     '{}.strand_bias_distribution.txt'),
                 ('depth_distribution', 'depth_distributions',
