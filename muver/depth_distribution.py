@@ -24,8 +24,8 @@ def calculate_depth_distribution(depths, output):
     # TODO: this is largely copied from calculate_bias_distribution
     with open(output, 'w') as OUT:
 
-        OUT.write('Average depth: {}\n'.format(str(mu)))
-        OUT.write('Standard deviation of depths: {}\n\n'.format(str(sigma)))
+        OUT.write('Average depth per copy: {}\n'.format(str(mu)))
+        OUT.write('Standard deviation of depths per copy: {}\n\n'.format(str(sigma)))
 
         OUT.write('Depth distribution:\n\n')
         OUT.write('\t'.join(['Depth', 'Frequency', 'Fit value']) +
