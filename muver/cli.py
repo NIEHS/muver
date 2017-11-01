@@ -16,6 +16,7 @@ from pipeline import run_pipeline as _run_pipeline
 from reference import create_reference_indices, read_chrom_sizes
 from repeat_indels import fit_repeat_indel_rates as _fit_repeat_indel_rates
 from repeats import create_repeat_file as _create_repeat_file
+from repeats import extract_repeat_file_sample as _extract_repeat_file_sample
 from utils import read_repeats
 from wrappers.samtools import get_mpileup_depths
 
@@ -156,6 +157,20 @@ def create_repeat_file(fasta_file, output_repeat_file):
     _create_repeat_file(
         fasta_file,
         out,
+    )
+
+@main.command()
+@click.argument('repeat_file', type=click.Path(exists=True))
+@click.argument('sample_size', type=int)
+def extract_repeat_file_sample(repeat_file, sample_size):
+    '''
+    Extract a random sample of repeats.
+    '''
+    sample_file = repeat_file + '.sample'
+    _extract_repeat_file_sample(
+        repeat_file,
+        sample_file,
+        sample_size,
     )
 
 @main.command()

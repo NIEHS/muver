@@ -2,6 +2,7 @@ from collections import OrderedDict
 import copy
 import itertools
 import regex as re
+import random
 
 
 def reverse_enumerate(iterable):
@@ -182,3 +183,20 @@ def create_repeat_file(fasta_file, output_file):
                     str(match['start']),
                     str(match['end']),
                 )) + '\n')
+
+
+def extract_repeat_file_sample(repeat_file, sample_file, total):
+    '''
+    Extract a random sample of repeat loci from a genome-wide list
+    '''
+    with open(repeat_file, 'r', 1) as f:
+        for i, l in enumerate(f):
+            pass
+        i += 1
+
+    keep = dict(zip(random.sample(range(0, i), total),itertools.repeat(0)))
+
+    with open(repeat_file, 'r', 1) as f, open(sample_file, 'w') as OUT:
+        for x, line in enumerate(f):
+            if x in keep:
+                OUT.write(line)
