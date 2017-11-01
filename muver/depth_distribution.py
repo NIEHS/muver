@@ -142,9 +142,21 @@ def process_chromosome_values(chromosome, chromosome_values, mu, sigma, OUT,
     side = 0
     last_side = 0
 
-    for i in range(d, len(chromosome_values) - d):
+    max = len(chromosome_values)
 
-        window_depth = numpy.mean(chromosome_values[i - d:i + d + 1])
+    for i in range(0, max):
+
+        if i < d:
+            window_start = 0
+            window_end = i + d + 1
+        elif i >= (max - d):
+            window_start = i - d
+            window_end = max
+        else:
+            window_start = i - d
+            window_end = i + d + 1
+
+        window_depth = numpy.mean(chromosome_values[window_start:window_end])
 
         if not (
             window_depth >= keep_threshold[0] and
