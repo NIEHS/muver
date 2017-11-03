@@ -112,7 +112,7 @@ class VariantList(object):
     information for a MuVer run.
     '''
     def __init__(self, input_vcf_fn, samples, excluded_regions_fn, repeats_fn,
-                 control_sample, chrom_sizes, depth_threshold=20):
+                 control_sample, chrom_sizes, fwer=0.01, depth_threshold=20):
 
         self.variants = []
         self.input_vcf_fn = input_vcf_fn
@@ -123,7 +123,7 @@ class VariantList(object):
         self.repeats_fn = repeats_fn
 
         genome_size = sum(chrom_sizes.values())
-        self.p_threshold = 1.0 - ((1.0 - 0.01) ** (1.0 / genome_size))
+        self.p_threshold = 1.0 - ((1.0 - fwer) ** (1.0 / genome_size))
 
         self.depth_threshold = depth_threshold
 

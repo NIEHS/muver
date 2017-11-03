@@ -30,12 +30,14 @@ def main(args=None):
               help='Number of processes to use.')
 @click.option('--excluded_regions', default=None, type=click.Path(exists=True),
               help='Regions to exclude in mutation calling (BED format).')
+@click.option('--fwer', default=0.01, type=float,
+              help='Familywise error rate.')
 @click.argument('reference_assembly', type=click.Path(exists=True))
 @click.argument('fastq_list', type=click.Path(exists=True))
 @click.argument('control_sample_name', type=str)
 @click.argument('experiment_directory', type=str)
 def run_pipeline(reference_assembly, fastq_list, control_sample_name,
-                 experiment_directory, processes, excluded_regions):
+                 experiment_directory, processes, excluded_regions, fwer):
     '''
     Run MuVer pipeline, starting with FASTQ files.
 
@@ -59,18 +61,21 @@ def run_pipeline(reference_assembly, fastq_list, control_sample_name,
         experiment_directory,
         p=processes,
         excluded_regions=excluded_regions,
+        fwer=fwer,
     )
 
 @main.command()
 @click.option('--excluded_regions', default=None, type=click.Path(exists=True),
               help='Regions to exclude in mutation calling (BED format).')
+@click.option('--fwer', default=0.01, type=float,
+              help='Familywise error rate.')
 @click.argument('reference_assembly', type=click.Path(exists=True))
 @click.argument('control_sample_name', type=str)
 @click.argument('sample_list', type=click.Path(exists=True))
 @click.argument('input_vcf', type=click.Path(exists=True))
 @click.argument('output_header', type=str)
 def call_mutations(reference_assembly, control_sample_name, sample_list,
-                  input_vcf, output_header, excluded_regions):
+                  input_vcf, output_header, excluded_regions, fwer):
     '''
     Call mutations from a HaplotypeCaller VCF file.
 
@@ -94,6 +99,7 @@ def call_mutations(reference_assembly, control_sample_name, sample_list,
         input_vcf,
         output_header,
         excluded_regions=excluded_regions,
+        fwer=fwer,
     )
 
 @main.command()
