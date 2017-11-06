@@ -2,7 +2,7 @@ import math
 import numpy
 
 from variant import Variant
-from utils import read_excluded_regions, read_repeats, read_filtered_sites
+from utils import read_excluded_regions, read_repeats_var, read_filtered_sites
 
 
 def get_allele_values(alleles, in_dict):
@@ -112,7 +112,7 @@ class VariantList(object):
     information for a MuVer run.
     '''
     def __init__(self, input_vcf_fn, samples, excluded_regions_fn, repeats_fn,
-                 control_sample, chrom_sizes, depth_threshold=20):
+                 control_sample, chrom_sizes, fwer=0.01, depth_threshold=20):
 
         self.variants = []
         self.input_vcf_fn = input_vcf_fn
@@ -123,7 +123,7 @@ class VariantList(object):
         self.repeats_fn = repeats_fn
 
         genome_size = sum(chrom_sizes.values())
-        self.p_threshold = 1.0 - ((1.0 - 0.01) ** (1.0 / genome_size))
+        self.p_threshold = 1.0 - ((1.0 - fwer) ** (1.0 / genome_size))
 
         self.depth_threshold = depth_threshold
 
@@ -132,10 +132,16 @@ class VariantList(object):
         else:
             excluded_regions = set()
 
-        repeats = read_repeats(self.repeats_fn)
         filtered_sites = read_filtered_sites(self.samples)
 
         self.read_variants_from_vcf()
+
+        var_dict=dict()
+
+        for variant in self.variants:
+            var_dict[(variant.chromosome, variant.position)] = 0
+
+        repeats = read_repeats_var(self.repeats_fn, var_dict)
 
         for variant in self.variants:
 
@@ -203,10 +209,13 @@ class VariantList(object):
 
                     for i, fields in enumerate(sample_fields):
                         sample = sample_indices[i]
-                        try:
-                            counts = fields.split(':')[sac_index].split(',')
-                        except IndexError:
+                        if sac_index == None:
                             counts = [0] * len(alleles) * 2
+                        else:
+                            try:
+                                counts = fields.split(':')[sac_index].split(',')
+                            except IndexError:
+                                counts = [0] * len(alleles) * 2
 
                         for allele in alleles:
                             forward = int(counts.pop(0))

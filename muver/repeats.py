@@ -2,6 +2,7 @@ from collections import OrderedDict
 import copy
 import itertools
 import regex as re
+import random
 
 
 def reverse_enumerate(iterable):
@@ -74,6 +75,18 @@ def create_repeat_file(fasta_file, output_file):
     repeat_units = generate_repeat_units()
     sequences = OrderedDict()
     seq_name = None
+    seq = ''
+
+    groups = dict()
+
+    for repeat_unit in repeat_units:
+
+        groups[repeat_unit] = dict()
+
+        for other_repeat_unit in repeat_units:
+
+            groups[repeat_unit][other_repeat_unit] = \
+                check_repeats(repeat_unit, other_repeat_unit)
 
     with open(fasta_file) as f:
 
@@ -81,12 +94,16 @@ def create_repeat_file(fasta_file, output_file):
 
             if line.startswith('>'):  # New FASTA entry
 
+                sequences[seq_name] = seq
+                seq = ''
                 seq_name = ''.join(line.split('>')[1:]).strip()
                 sequences[seq_name] = ''
 
             else:
 
-                sequences[seq_name] += line.strip()
+                seq += line.strip()
+
+    sequences[seq_name] = seq
 
     with open(output_file, 'w') as OUT:
 
@@ -130,26 +147,31 @@ def create_repeat_file(fasta_file, output_file):
             sort = sorted(matches, key=lambda x: (x['start'], -x['end']))
             kept_matches = []
 
-            for i, match in reverse_enumerate(sort):
+            i = len(sort) - 1
+            while i >= 0:
 
                 keep = True
 
-                for other_match in reversed(sort[:i]):
+                j = i - 1
+                while j >= 0:
 
                     if (
-                        match['start'] >= other_match['start'] and
-                        match['end'] <= other_match['end'] and
-                        check_repeats(
-                            match['repeat_unit'], other_match['repeat_unit'])
+                        sort[i]['start'] >= sort[j]['start'] and
+                        sort[i]['end'] <= sort[j]['end'] and
+                        groups[sort[i]['repeat_unit']][sort[j]['repeat_unit']]
                     ):
                         keep = False
                         break
 
-                    if match['start'] > other_match['end']:
+                    if sort[i]['start'] > sort[j]['end']:
                         break
 
+                    j = j - 1
+
                 if keep:
-                    kept_matches.append(match)
+                    kept_matches.append(sort[i])
+
+                i = i - 1
 
             for match in sorted(kept_matches, key=lambda x: x['start']):
 
@@ -161,3 +183,20 @@ def create_repeat_file(fasta_file, output_file):
                     str(match['start']),
                     str(match['end']),
                 )) + '\n')
+
+
+def extract_repeat_file_sample(repeat_file, sample_file, total):
+    '''
+    Extract a random sample of repeat loci from a genome-wide list
+    '''
+    with open(repeat_file, 'r', 1) as f:
+        for i, l in enumerate(f):
+            pass
+        i += 1
+
+    keep = dict(zip(random.sample(range(0, i), total),itertools.repeat(0)))
+
+    with open(repeat_file, 'r', 1) as f, open(sample_file, 'w') as OUT:
+        for x, line in enumerate(f):
+            if x in keep:
+                OUT.write(line)

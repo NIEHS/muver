@@ -231,9 +231,11 @@ def fit_rates(indel_rates):
 
                 mid_value = (max(repeat_rates) + min(repeat_rates)) / 2
                 mid_diff = float('inf')
+                peak_length = tract_lengths[repeat_rates.index(max(repeat_rates))]
                 for i, val in enumerate(repeat_rates):
                     diff = abs(val - mid_value)
-                    if diff < mid_diff:
+                    if diff < mid_diff and tract_lengths[i] <= peak_length:
+                        mid_diff = diff
                         p0_x0 = tract_lengths[i]
 
                 popt, pcov = curve_fit(
@@ -268,18 +270,12 @@ def plot_fits(indel_rates, fits, output_header):
             rates = indel_rates[event][repeat_length]
 
             tract_lengths = []
-            repeat_rates = []
-
-            for tract_length, rate in rates.items():
-
-                tract_lengths.append(tract_length)
-                repeat_rates.append(math.log10(rate))
-
             fitted_values = []
             raw_values = []
 
-            for i, x in enumerate(sorted(tract_lengths)):
-                raw_values.append(repeat_rates[i])
+            for x in sorted(rates.keys()):
+                tract_lengths.append(x)
+                raw_values.append(math.log10(rates[x]))
 
                 fitted = logistic(
                     x,
@@ -324,6 +320,39 @@ def print_fits(fits, output_file):
         for fit in ordered_fits:
             writer.writerow(fit)
 
+def print_rates(indel_rates, output_file):
+    '''
+    Print observed indel error rates to an output file.
+    '''
+    with open(output_file.strip('.txt') + '.rates.txt','w') as f:
+
+        max = 0
+        for repeat_length in (1, 2, 3, 4):
+            for event in ('insertion', 'deletion'):
+                f.write('\t' + event + '_' + str(repeat_length))
+                curmax = sorted(indel_rates[event][repeat_length].keys(), \
+                    reverse=True)[0]
+                if curmax > max:
+                    max = curmax
+
+        f.write('\n')
+
+        i = 4
+        while i <= max:
+            count = 0
+            out = str(i)
+            for repeat_length in (1, 2, 3, 4):
+                for event in ('insertion', 'deletion'):
+                    if i in indel_rates[event][repeat_length]:
+                        rate = indel_rates[event][repeat_length][i]
+                        out += '\t'
+                        out += str(math.log10(rate))
+                        count = count + 1
+                    else:
+                        out += '\tX'
+            if count > 0:
+                f.write(out + '\n')
+            i = i + 1
 
 def read_fits(fits_file):
     '''
@@ -347,6 +376,28 @@ def read_fits(fits_file):
 
     return fits
 
+def read_rates(rates_file):
+    '''
+    Read observed indel error rates from a tab-delimited TXT file.
+    '''
+    rates=dict()
+
+    for t in ['insertion', 'deletion']:
+        rates[t]=dict()
+        for n in range(1,5):
+            rates[t][n]=dict()
+
+    with open(rates_file) as f:
+        f.readline()
+        for line in f:
+            fields=line.strip().split('\t')
+            i=1
+            for n in range(1,5):
+                for t in ['insertion', 'deletion']:
+                    if fields[i] != 'X':
+                        rates[t][n][int(fields[0])] = 10**float(fields[i])
+                    i += 1
+    return(rates)
 
 def fit_repeat_indel_rates(repeats, bam_file, output_file,
                                     output_plot_header=None):
@@ -370,5 +421,6 @@ def fit_repeat_indel_rates(repeats, bam_file, output_file,
     fits = fit_rates(indel_rates)
 
     print_fits(fits, output_file)
+    print_rates(indel_rates, output_file)
     if output_plot_header:
         plot_fits(indel_rates, fits, output_plot_header)

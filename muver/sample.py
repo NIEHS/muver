@@ -22,7 +22,6 @@ class Sample(object):
 
         for attr in (
             'cnv_bedgraph',
-            'cnv_regions',
             'strand_bias_std',
             'filtered_sites',
             'strand_bias_distribution',
@@ -66,6 +65,8 @@ class Sample(object):
 
         if self.cnv_bedgraph:
             self.cnv_regions = self.read_cnv_bedgraph()
+        else:
+            self.cnv_regions = dict()
 
         if self.repeat_indel_fits:
             self.repeat_indel_fits_dict = read_fits(self.repeat_indel_fits)
@@ -137,7 +138,7 @@ class Sample(object):
                 ('merged_bam', 'bams', '{}.bam'),
                 ('depth_bedgraph', 'depth_distributions', '{}.bedGraph'),
                 ('filtered_sites', 'filtered_sites',
-                    '{}.filtered_sites.txt'),
+                    '{}.filtered_sites.bed'),
                 ('strand_bias_distribution', 'depth_distributions',
                     '{}.strand_bias_distribution.txt'),
                 ('depth_distribution', 'depth_distributions',
