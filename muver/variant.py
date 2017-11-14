@@ -290,7 +290,7 @@ class Variant(object):
                     for strand, sample_value in sac[sample][allele].items():
                         control_value = sac[self.control_sample][allele][strand]
 
-                        if sample_value > 0 and control_value > 0:
+                        if sample_value > 0 or control_value > 0:
                             c = float(control_value)
                             s = float(sample_value)
                             c_sum = float(control_sum)
