@@ -32,6 +32,7 @@ Available commands:
 * [calculate_read_depths](#calculate_read_depths)
 * [correct_depths](#correct_depths)
 * [create_repeat_file](#create_repeat_file)
+* [extract_repeat_file_sample](#extract_repeat_file_sample)
 * [fit_repeat_indel_rates](#fit_repeat_indel_rates)
 * [index_reference](#index_reference)
 * [plot_allelic_fraction](#plot_allelic_fraction)
@@ -97,6 +98,9 @@ The sample_info.txt file contains parameters and paths to output files associate
 * `--excluded_regions PATH`
 
   Path to a BED file specifying genomic regions to ignore during mutation calling.
+* `--fwer FLOAT`
+
+  Rate at which to control family-wise error.
 
 #### Arguments
 * `REFERENCE_ASSEMBLY`
@@ -289,9 +293,13 @@ The VCF file contains the following FORMAT fields for each sample:
   Identifies a conversion event from one allele to another. Reported in a comma-delimited list with each entry corresponding to a called mutation.
 
 #### Options
-*  `--excluded_regions PATH`
+* `--excluded_regions PATH`
 
-   Path to a BED file specifying genomic regions to ignore during mutation calling.
+  Path to a BED file specifying genomic regions to ignore during mutation calling.
+
+* `--fwer FLOAT`
+
+  Rate at which to control family-wise error, default = 0.01.
 
 #### Arguments
 * `REFERENCE_ASSEMBLY`
@@ -357,17 +365,32 @@ The first two lines of the output file give the parameters of the fit. The remai
 ```
 muver calculate_depth_distribution [OPTIONS] BEDGRAPH_FILE REFERENCE_ASSEMBLY OUTPUT_DEPTH_DISTRIBUTION
 ```
-Calculates the distribution of values for a bedGraph file. Generates a histogram of values and fits those values to a normal distribution. The histogram and the parameters of the fit are reported in the output file.
+Calculates the distribution of values per chromosome copy for a bedGraph file. Generates a histogram of values and fits those values to a normal distribution. The histogram and the parameters of the fit are reported in the output file.
 
 #### Output format
 The first two lines of the output file give the parameters of the fit. The remainder of the file gives a histogram of observed frequencies and the corresponding fit value.
 
-In the filtered regions file, each row corresponds to a filtered position.  Three values are given in each row: chromosome, position, and observed depth at that position.
+In the filtered regions BED file, each row corresponds to a filtered region.  Three values are given in each row: chromosome, interval start, and interval end.
 
 #### Options
 * `--output_filtered_regions TEXT`
 
-  If specified, creates a list in text file format of positions to filter prior to mutation calling. Filters on the basis of abnormal depth relative to the distribution of values in the bedGraph file.
+  If specified, creates a list in BED format of regions to filter prior to mutation calling. Filters on the basis of abnormal depth relative to the distribution of values in the bedGraph file.
+* `--ploidy INTEGER`
+
+  Sample ploidy, default = 2.  This value is utilized as the assumed copy number in non-CNV regions.
+
+* `--cnv_bedgraph_file TEXT`
+
+  If provided, values contained in this file will be utilized rather than the global ploidy when muver determines depth per copy for a given position.  File is assumed to be bedGraph format, consisting of four tab-separated columns:  chromosome, interval start, interval end, copy number.
+
+* `--p_threshold FLOAT`
+
+  Threshold to be utilized in determination of abnormal depth, default = 1 x 10^-4.
+
+* `--merge_window INTEGER`
+
+  Adjacent positions with abnormal depth, falling on the same side of the genomic median value, within this window (default = 1000) will be used to define the edges filtered regions.
 
 #### Arguments
 * `BEDGRAPH_FILE`
@@ -466,6 +489,23 @@ Each line in the output file corresponds to a single identified repeat.  Each li
 * `OUTPUT_REPEAT_FILE`
 
   Path to output text file describing discovered repeat sequences.
+
+### extract_repeat_file_sample
+```
+muver extract_repeat_file_sample REPEAT_FILE SAMPLE_SIZE
+```
+Given a previously generated repeat file, extracts a random sample of loci of user-define size.  Helpful in reducing memory usage in the analysis of large genomes.
+
+#### Output format
+Identical to repeat file above.  The file name will be automatically generated based on the input file name, appending ".sample".  If such a file exists, it will be automatically utilized by `run_pipeline` during determination of indel error rates.
+
+#### Arguments
+* `REPEAT_FILE`
+
+  Path to the previously created repeat file.
+* `SAMPLE_SIZE`
+
+  Size of sample to be extracted.  A sample of 5,000,000 repeat sites has been utlized effectively to assess indel error rates in a high-depth human data set.
 
 ### fit_repeat_indel_rates
 ```
