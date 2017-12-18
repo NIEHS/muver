@@ -324,7 +324,7 @@ def print_rates(indel_rates, output_file):
     '''
     Print observed indel error rates to an output file.
     '''
-    with open(output_file.strip('.txt') + '.rates.txt','w') as f:
+    with open(output_file.rstrip('txt') + 'rates.txt','w') as f:
 
         max = 0
         for repeat_length in (1, 2, 3, 4):

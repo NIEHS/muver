@@ -290,7 +290,7 @@ class Variant(object):
                     for strand, sample_value in sac[sample][allele].items():
                         control_value = sac[self.control_sample][allele][strand]
 
-                        if sample_value > 0 and control_value > 0:
+                        if sample_value > 0 or control_value > 0:
                             c = float(control_value)
                             s = float(sample_value)
                             c_sum = float(control_sum)
@@ -683,12 +683,12 @@ class Variant(object):
                     1.0 - eaf[genotype, (None, None, None)][subclonal_allele],
                 )
 
-                if binomial_p_value > p_threshold:
-                    self.sample_subclonal_alleles[sample] = None
-                    self.sample_subclonals[sample] = {
-                        'genotype': None,
-                        'frequency': None,
-                    }
+                #if binomial_p_value > p_threshold:
+                #    self.sample_subclonal_alleles[sample] = None
+                #    self.sample_subclonals[sample] = {
+                #        'genotype': None,
+                #        'frequency': None,
+                #    }
             else:
                 binomial_p_value = None
 

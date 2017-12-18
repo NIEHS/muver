@@ -222,7 +222,10 @@ def run_pipeline(reference_assembly, fastq_list, control_sample,
 
     # Characterize repeats
 
-    repeats = read_repeats(repeat_file)
+    if os.path.isfile(repeat_file + '.sample'):
+        repeats = read_repeats(repeat_file + '.sample')
+    else:
+        repeats = read_repeats(repeat_file)
 
     pool.map(characterize_repeat_indel_rates, zip(
         [s.get_intermediate_file_names() for s in samples],
