@@ -683,12 +683,12 @@ class Variant(object):
                     1.0 - eaf[genotype, (None, None, None)][subclonal_allele],
                 )
 
-                if binomial_p_value > p_threshold:
-                    self.sample_subclonal_alleles[sample] = None
-                    self.sample_subclonals[sample] = {
-                        'genotype': None,
-                        'frequency': None,
-                    }
+                #if binomial_p_value > p_threshold:
+                #    self.sample_subclonal_alleles[sample] = None
+                #    self.sample_subclonals[sample] = {
+                #        'genotype': None,
+                #        'frequency': None,
+                #    }
             else:
                 binomial_p_value = None
 
