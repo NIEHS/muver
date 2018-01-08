@@ -31,13 +31,19 @@ def main(args=None):
 @click.option('--excluded_regions', default=None, type=click.Path(exists=True),
               help='Regions to exclude in mutation calling (BED format).')
 @click.option('--fwer', default=0.01, type=float,
-              help='Familywise error rate.')
+              help='Familywise error rate. Default = 0.01.')
+@click.option('--max_records', default=1000000, type=int,
+              help='Maximum number of reads to store in memory when \
+              sorting BAM files. Modify when any FASTQ pair \
+              contains >1 billion reads. See manual for guidance \
+              in setting this parameter. Default = 1000000.')
 @click.argument('reference_assembly', type=click.Path(exists=True))
 @click.argument('fastq_list', type=click.Path(exists=True))
 @click.argument('control_sample_name', type=str)
 @click.argument('experiment_directory', type=str)
 def run_pipeline(reference_assembly, fastq_list, control_sample_name,
-                 experiment_directory, processes, excluded_regions, fwer):
+                 experiment_directory, processes, excluded_regions,
+                 fwer, max_records):
     '''
     Run MuVer pipeline, starting with FASTQ files.
 
@@ -62,6 +68,7 @@ def run_pipeline(reference_assembly, fastq_list, control_sample_name,
         p=processes,
         excluded_regions=excluded_regions,
         fwer=fwer,
+        max_records=max_records,
     )
 
 @main.command()
