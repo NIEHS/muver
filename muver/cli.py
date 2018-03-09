@@ -122,11 +122,13 @@ def index_reference(reference_assembly):
 @main.command()
 @click.option('--mean', default=None, type=float,
               help='Manually specify the mean.')
+@click.option('--ploidy', default=2, type=int,
+              help='Sample ploidy.')
 @click.argument('bedgraph_file', type=click.Path(exists=True))
 @click.argument('reference_assembly', type=click.Path(exists=True))
 @click.argument('output_file', type=str)
 def calculate_depth_ratios(bedgraph_file, reference_assembly, output_file,
-                           mean):
+                           mean, ploidy):
     '''
     Considering distance from chromosome ends, find the median ratio of depth
     to the average over 500-bp bins.
@@ -136,6 +138,7 @@ def calculate_depth_ratios(bedgraph_file, reference_assembly, output_file,
         reference_assembly,
         output_file,
         mean=mean,
+        ploidy=ploidy,
     )
 
 @main.command()

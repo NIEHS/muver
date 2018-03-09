@@ -9,7 +9,7 @@ from reference import read_chrom_sizes
 
 
 def calculate_depth_ratios(input_bedgraph, reference_assembly, output_file,
-                           mean=None, bin_size=500):
+                           mean=None, ploidy=2, bin_size=500):
     '''
     For binned depths across the input bedGraph file, calculate the ratio
     relative to the mean.
@@ -29,6 +29,7 @@ def calculate_depth_ratios(input_bedgraph, reference_assembly, output_file,
             depth = float(depth)
 
             if depth != 0:
+                depth = depth / ploidy
                 for position in range(start + 1, end + 1):
                     distance_from_chrom_start = end - 1
                     distance_from_chrom_end = chrom_sizes[chromosome] - end
