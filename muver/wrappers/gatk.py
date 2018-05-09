@@ -6,7 +6,7 @@ def run_base_recalibrator(bam, known_sites, ref_fn, recal_table, log_file):
     Run GATK BaseRecalibrator.
     '''
     quiet_call([
-        'java', '-Xmx8g', '-jar',
+        'java', '-jar',
         PATHS['gatk'],
         '-T', 'BaseRecalibrator',
         '-I', bam,
@@ -24,7 +24,7 @@ def run_print_reads_bqsr(input_bam, ref_fn, recal_table, output_bam, log_file):
     Run GATK PrintReads, observing BQSR relcaibration table.
     '''
     quiet_call([
-        'java', '-Xmx8g', '-jar',
+        'java', '-jar',
         PATHS['gatk'],
         '-T', 'PrintReads',
         '-I', input_bam,
@@ -44,7 +44,7 @@ def run_haplotype_caller(bams, ref_fn, output_vcf, log_file, nct=1):
         input_list.extend(('-I', bam))
 
     quiet_call([
-        'java', '-Xmx8g', '-jar',
+        'java', '-jar',
         PATHS['gatk'],
         '-T', 'HaplotypeCaller',
         '-o', output_vcf,
@@ -65,7 +65,7 @@ def realigner_target_creator(ref_fn, in_bam, intervals):
     Run GATK RealignerTargetCreator.
     '''
     quiet_call([
-        'java', '-Xmx4g', '-jar',
+        'java', '-jar',
         PATHS['gatk'],
         '-R', ref_fn,
         '-T', 'RealignerTargetCreator',
@@ -79,7 +79,7 @@ def indel_realigner(ref_fn, log, in_bam, intervals, realigned_bam):
     Run GATK IndelRealigner.
     '''
     quiet_call([
-        'java', '-Xmx4g', '-jar',
+        'java', '-jar',
         PATHS['gatk'],
         '-R', ref_fn,
         '-T', 'IndelRealigner',

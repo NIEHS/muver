@@ -1,7 +1,8 @@
 import csv
 import glob
 import os
-from tempfile import NamedTemporaryFile
+import shutil
+from tempfile import NamedTemporaryFile, mkdtemp
 
 from repeat_indels import read_fits
 
@@ -30,13 +31,14 @@ class Sample(object):
             'repeat_indel_fits',
             'repeat_indel_fits_dict',
             'merged_bam',
-            'depth_bedgraph'
+            'depth_bedgraph',
             '_mpileup_out',
         ):
             setattr(self, attr, None)
 
         for attr in (
             'realignment_logs',
+            'tmp_dirs',
             '_sams',
             '_same_chr_sams',
             '_mapq_filtered_sams',
@@ -129,6 +131,8 @@ class Sample(object):
             ):
                 setattr(self, attr, named_temp(suffix=suffix))
 
+            setattr(self, 'tmp_dirs', [mkdtemp(dir=self.exp_dir) for i in n])
+
             realignment_logs = \
                 ['{{}}.realignment.{}.log'.format(str(i)) for i in n]
             setattr(self, 'realignment_logs',
@@ -165,7 +169,10 @@ class Sample(object):
                 else:
                     file_names[attr] = value.name
             else:
-                file_names[attr] = value
+                if isinstance(value, list):
+                    file_names[attr] = [tmp for tmp in value]
+                else:
+                    file_names[attr] = value
 
         return file_names
 
@@ -195,6 +202,9 @@ class Sample(object):
                 for fn in set(to_remove):
                     if fn != name:
                         os.remove(fn)
+
+        for name in self.tmp_dirs:
+            shutil.rmtree(name)
 
 
 def read_samples_from_text(sample_info_fn, exp_dir=None):

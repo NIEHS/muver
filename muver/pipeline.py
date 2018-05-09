@@ -28,7 +28,7 @@ def process_sams(args):
     - Fix mate information.
     - Merge processed BAMS for a given sample.
     '''
-    sample_name, intermediate_files, reference_assembly = args
+    sample_name, intermediate_files, reference_assembly, max_records = args
 
     for i in range(len(intermediate_files['_sams'])):
 
@@ -44,11 +44,15 @@ def process_sams(args):
             intermediate_files['_mapq_filtered_sams'][i],
             intermediate_files['_read_group_bams'][i],
             sample_name,
+            intermediate_files['tmp_dirs'][i],
+            max_records,
         )
         picard.deduplicate(
             intermediate_files['_read_group_bams'][i],
             intermediate_files['_deduplicated_bams'][i],
             intermediate_files['_deduplication_metrics'][i],
+            intermediate_files['tmp_dirs'][i],
+            max_records,
         )
         gatk.realigner_target_creator(
             reference_assembly,
@@ -65,6 +69,8 @@ def process_sams(args):
         picard.fix_mate_information(
             intermediate_files['_realigned_bams'][i],
             intermediate_files['_fixed_mates_bams'][i],
+            intermediate_files['tmp_dirs'][i],
+            max_records,
         )
 
     samtools.merge_bams(
@@ -140,7 +146,8 @@ def analyze_depth_distribution(args):
 
 
 def run_pipeline(reference_assembly, fastq_list, control_sample,
-                 experiment_directory, p=1, excluded_regions=None, fwer=0.01):
+                 experiment_directory, p=1, excluded_regions=None,
+                 fwer=0.01, max_records=1000000):
     '''
     Run the MuVer pipeline considering input FASTQ files.  All files written
     to the experiment directory.
@@ -185,6 +192,7 @@ def run_pipeline(reference_assembly, fastq_list, control_sample,
         [s.sample_name for s in samples],
         [s.get_intermediate_file_names() for s in samples],
         repeat(reference_assembly),
+        repeat(max_records),
     ))
 
     # Run HaplotypeCaller

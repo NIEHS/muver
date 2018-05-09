@@ -101,6 +101,9 @@ The sample_info.txt file contains parameters and paths to output files associate
 * `--fwer FLOAT`
 
   Rate at which to control family-wise error.
+* `--max_records`
+
+  Maximum number of reads to store in memory when sorting BAM files (default = 1,000,000). This value is passed to picard as the parameter 'MAX_RECORDS_IN_RAM', and requires approximately 2 GB of memory per million, multiplied by the count of samples or the number of simultaneous processes/threads specified with '-p', whichever is lower. This value should be modified when any input FASTQ pair contains more than 1 billion reads, to prevent picard from opening more temporary files than the system will allow. This file limit is typically 1024, and can be queried by running the following command: 'ulimit -n'. This parameter should be set no lower than (Maximum Read Count / Limit). In some cases, the limit may be increased to allow reduced memory usage. The maximum value may be queried using 'ulimit -Hn'.
 
 #### Arguments
 * `REFERENCE_ASSEMBLY`
