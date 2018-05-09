@@ -15,6 +15,7 @@ After the correct paths have been set, install muver with the following command:
 ```
 python setup.py install
 ```
+A [Docker image](https://hub.docker.com/r/lavenderca/muver/) is also available.
 
 ## Usage
 All of muvers functions may be accessed using its command line interface. General usage is as follows:
