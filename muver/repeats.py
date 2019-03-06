@@ -96,7 +96,7 @@ def create_repeat_file(fasta_file, output_file):
 
                 sequences[seq_name] = seq
                 seq = ''
-                seq_name = ''.join(line.split('>')[1:]).strip()
+                seq_name = re.split('>|\s+',line.strip())[1]
                 sequences[seq_name] = ''
 
             else:
