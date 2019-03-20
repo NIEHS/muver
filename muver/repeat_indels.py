@@ -1,5 +1,7 @@
 from collections import defaultdict
 import csv
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import math
 import re
@@ -329,11 +331,12 @@ def print_rates(indel_rates, output_file):
         max = 0
         for repeat_length in (1, 2, 3, 4):
             for event in ('insertion', 'deletion'):
-                f.write('\t' + event + '_' + str(repeat_length))
-                curmax = sorted(indel_rates[event][repeat_length].keys(), \
-                    reverse=True)[0]
-                if curmax > max:
-                    max = curmax
+                if len(indel_rates[event][repeat_length]) > 0:
+                    f.write('\t' + event + '_' + str(repeat_length))
+                    curmax = sorted(indel_rates[event][repeat_length].keys(), \
+                        reverse=True)[0]
+                    if curmax > max:
+                        max = curmax
 
         f.write('\n')
 
