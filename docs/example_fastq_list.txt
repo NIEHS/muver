@@ -1,0 +1,6 @@
+Sample Name Mate 1 FASTQ	Mate 2 FASTQ	Ploidy	CNV bedGraph
+parent	parent.1.fastq.gz	parent.2.fastq.gz	2	parent_CNVs.bedGraph
+progeny_1	progeny_1.1.fastq.gz	progeny_1.2.fastq.gz	2	progeny_1_CNVs.bedGraph
+progeny_2	progeny_2.1.fastq.gz	progeny_2.2.fastq.gz	2	progeny_2_CNVs.bedGraph
+progeny_3	progeny_3.1.fastq.gz	progeny_3.2.fastq.gz	2	progeny_3_CNVs.bedGraph
+progeny_4	progeny_4.1.fastq.gz	progeny_4.2.fastq.gz	2	progeny_4_CNVs.bedGraph
