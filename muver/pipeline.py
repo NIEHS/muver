@@ -147,7 +147,7 @@ def analyze_depth_distribution(args):
 
 def run_pipeline(reference_assembly, fastq_list, control_sample,
                  experiment_directory, p=1, excluded_regions=None,
-                 fwer=0.01, max_records=1000000):
+                 fwer=0.01, max_records=1000000, depth_threshold=20):
     '''
     Run the MuVer pipeline considering input FASTQ files.  All files written
     to the experiment directory.
@@ -245,7 +245,7 @@ def run_pipeline(reference_assembly, fastq_list, control_sample,
 
     variants = VariantList(
         haplotype_caller_vcf, samples, excluded_regions, repeat_file,
-        control_sample, chrom_sizes, fwer)
+        control_sample, chrom_sizes, fwer, depth_threshold)
 
     text_output = os.path.join(
         experiment_directory,

@@ -37,13 +37,15 @@ def main(args=None):
               sorting BAM files. Modify when any FASTQ pair \
               contains >1 billion reads. See manual for guidance \
               in setting this parameter. Default = 1000000.')
+@click.option('--depth_threshold', default=20, type=int,
+              help='Minimum depth to call genotypes. Default = 20.')
 @click.argument('reference_assembly', type=click.Path(exists=True))
 @click.argument('fastq_list', type=click.Path(exists=True))
 @click.argument('control_sample_name', type=str)
 @click.argument('experiment_directory', type=str)
 def run_pipeline(reference_assembly, fastq_list, control_sample_name,
                  experiment_directory, processes, excluded_regions,
-                 fwer, max_records):
+                 fwer, max_records, depth_threshold):
     '''
     Run MuVer pipeline, starting with FASTQ files.
 
@@ -69,6 +71,7 @@ def run_pipeline(reference_assembly, fastq_list, control_sample_name,
         excluded_regions=excluded_regions,
         fwer=fwer,
         max_records=max_records,
+        depth_threshold=depth_threshold,
     )
 
 @main.command()
@@ -76,13 +79,16 @@ def run_pipeline(reference_assembly, fastq_list, control_sample_name,
               help='Regions to exclude in mutation calling (BED format).')
 @click.option('--fwer', default=0.01, type=float,
               help='Familywise error rate.')
+@click.option('--depth_threshold', default=20, type=int,
+              help='Minimum depth to call genotypes. Default = 20.')
 @click.argument('reference_assembly', type=click.Path(exists=True))
 @click.argument('control_sample_name', type=str)
 @click.argument('sample_list', type=click.Path(exists=True))
 @click.argument('input_vcf', type=click.Path(exists=True))
 @click.argument('output_header', type=str)
 def call_mutations(reference_assembly, control_sample_name, sample_list,
-                  input_vcf, output_header, excluded_regions, fwer):
+                  input_vcf, output_header, excluded_regions, fwer,
+                  depth_threshold):
     '''
     Call mutations from a HaplotypeCaller VCF file.
 
@@ -107,6 +113,7 @@ def call_mutations(reference_assembly, control_sample_name, sample_list,
         output_header,
         excluded_regions=excluded_regions,
         fwer=fwer,
+        depth_threshold=depth_threshold,
     )
 
 @main.command()
