@@ -49,7 +49,7 @@ def calculate_bias_distribution(_iter, ref_fn, output):
                 plus_tally[bases[i]] += 1
             elif re.match('[acgt]', bases[i]):
                 present_alleles.add(bases[i].upper())
-                minus_tally[bases[i]] += 1
+                minus_tally[bases[i].upper()] += 1
 
             elif re.match('[+-]', bases[i]):
                 indel_type = bases[i]
