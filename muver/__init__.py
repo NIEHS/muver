@@ -2,6 +2,6 @@
 
 """Top-level package for MuVer."""
 
-__author__ = """Christopher Andrew Lavender"""
-__email__ = 'christopher.lavender@nih.gov'
-__version__ = '0.1.0'
+__author__ = """Christopher Andrew Lavender, Adam Burkholder"""
+__email__ = 'adam.burkholder@nih.gov'
+__version__ = '1.2.2'

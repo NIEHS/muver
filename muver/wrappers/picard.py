@@ -11,7 +11,7 @@ def add_read_groups(in_sam, out_bam, sample_header, tmp_dir, max_records):
     sample_header -- set read groups to sample_header
     '''
     quiet_call([
-        'java', '-jar',
+        PATHS['java'], '-jar',
         PATHS['picard'],
         'AddOrReplaceReadGroups',
         'VALIDATION_STRINGENCY=SILENT',
@@ -33,7 +33,7 @@ def deduplicate(in_bam, out_bam, metrics_file, tmp_dir, max_records):
     Run Picard MarkDuplicates.
     '''
     quiet_call([
-        'java', '-jar',
+        PATHS['java'], '-jar',
         PATHS['picard'],
         'MarkDuplicates',
         'VALIDATION_STRINGENCY=SILENT',
@@ -53,7 +53,7 @@ def create_sequence_dictionary(ref_fn):
     '''
     if not os.path.exists(ref_fn.split('.fa')[0] + '.dict'):
         quiet_call([
-            'java', '-jar',
+            PATHS['java'], '-jar',
             PATHS['picard'],
             'CreateSequenceDictionary',
             'R=' + ref_fn,
@@ -66,7 +66,7 @@ def fix_mate_information(in_bam, out_bam, tmp_dir, max_records):
     Run Picard FixMateInformation.
     '''
     quiet_call([
-        'java', '-jar',
+        PATHS['java'], '-jar',
         PATHS['picard'],
         'FixMateInformation',
         'VALIDATION_STRINGENCY=SILENT',
