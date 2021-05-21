@@ -20,11 +20,11 @@ requirements = [
 ]
 
 setup_requirements = [
-    'pytest-runner',
+    'pytest-runner<=5.2',
 ]
 
 test_requirements = [
-    'pytest',
+    'pytest<=4.6.11',
 ]
 
 setup(
