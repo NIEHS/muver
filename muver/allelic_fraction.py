@@ -27,16 +27,19 @@ def get_allelic_fractions(bam_file, ref_fn, output_file):
         while i < len(bases):
             if re.match('[.,]', bases[i]):
                 allele_counts[reference_allele] += 1
-            elif re.match('[ACGTacgt]', bases[i]):
+            elif re.match('[ACGTNacgtn]', bases[i]):
                 allele_counts[bases[i].upper()] += 1
             elif re.match('[+-]', bases[i]):
                 indel_type = bases[i]
                 i += 1
-                indel_length = int(bases[i])
-                i += 1
+                num = ''
+                while re.match('[0-9]', bases[i]):
+                    num += bases[i]
+                    i += 1
+                indel_length = int(num)
                 indel = indel_type + bases[i:i+indel_length].upper()
                 allele_counts[indel] += 1
-                i += indel_length
+                i += indel_length - 1
             elif bases[i] == '^':
                 i += 1
             elif bases[i] == '*':

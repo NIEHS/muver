@@ -44,10 +44,10 @@ def calculate_bias_distribution(_iter, ref_fn, output):
                 present_alleles.add(reference)
                 minus_tally[reference] += 1
 
-            elif re.match('[ACGT]', bases[i]):
+            elif re.match('[ACGTN]', bases[i]):
                 present_alleles.add(bases[i])
                 plus_tally[bases[i]] += 1
-            elif re.match('[acgt]', bases[i]):
+            elif re.match('[acgtn]', bases[i]):
                 present_alleles.add(bases[i].upper())
                 minus_tally[bases[i].upper()] += 1
 
@@ -55,14 +55,18 @@ def calculate_bias_distribution(_iter, ref_fn, output):
                 indel_type = bases[i]
                 i += 1
 
-                indel_length = int(bases[i])
-                i += 1
+                num = ''
+                while re.match('[0-9]', bases[i]):
+                    num += bases[i]
+                    i += 1
+
+                indel_length = int(num)
 
                 indel = indel_type + bases[i:i+indel_length].upper()
                 present_alleles.add(indel)
-                if re.match('[ACGT]', bases[i:i+indel_length]):
+                if re.match('[ACGTN]', bases[i:i+indel_length]):
                     plus_tally[indel] += 1
-                elif re.match('[acgt]', bases[i:i+indel_length]):
+                elif re.match('[acgtn]', bases[i:i+indel_length]):
                     minus_tally[indel] += 1
                 i += indel_length - 1
 

@@ -29,7 +29,7 @@ test_requirements = [
 
 setup(
     name='muver',
-    version='1.2.2',
+    version='1.2.4',
     description="SNP and indel caller for mutation accumulation experiments",
     long_description=readme + '\n\n' + history,
     author="Christopher Andrew Lavender, Adam Burkholder",
