@@ -1,6 +1,10 @@
 # muver
 muver is an analytical framework developed to improve sensitivity and increase accuracy in mutation identification from high-throughput sequencing data. muver provides significantly increased accuracy in challenging genomic contexts, including low complexity repetitive sequences. The muver framework has been applied to data from mutation accumulation experiments in yeast. 
 
+## Maintainer
+
+Adam Burkholder - adam.burkholder@nih.gov
+
 ## Requirements
 muver was developed using Python 2.7.13. In addition to requirements specified in setup.py, muver requires installation of the following tools:
 * [Bowtie2](http://bowtie-bio.sourceforge.net/bowtie2/index.shtml)
